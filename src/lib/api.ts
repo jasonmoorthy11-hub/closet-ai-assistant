@@ -5,7 +5,6 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   imageUrl?: string;
-  userPhotoUrl?: string;
   quickReplies?: string[];
   imageError?: string;
 }
