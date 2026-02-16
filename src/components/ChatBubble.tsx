@@ -30,7 +30,7 @@ export function ChatBubble({ message, onQuickReply, userPhotoUrl }: ChatBubblePr
               </div>
             )}
             {showBeforeAfter ? (
-              <div className="mb-2">
+              <div className="mb-2 max-w-[400px]">
                 <div className="flex flex-col sm:flex-row gap-2">
                   <div className="flex-1 min-w-0">
                     <span className="inline-block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70 bg-muted/50 rounded px-1.5 py-0.5 mb-1">Before</span>
@@ -38,7 +38,7 @@ export function ChatBubble({ message, onQuickReply, userPhotoUrl }: ChatBubblePr
                       src={userPhotoUrl}
                       alt="Original space"
                       onClick={() => setLightboxOpen(true)}
-                      className="rounded-xl shadow-sm object-cover cursor-pointer hover:opacity-90 transition-opacity w-full max-w-[190px] sm:max-w-full"
+                      className="rounded-xl shadow-sm object-cover cursor-pointer hover:opacity-90 transition-opacity w-full"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -47,7 +47,7 @@ export function ChatBubble({ message, onQuickReply, userPhotoUrl }: ChatBubblePr
                       src={message.imageUrl}
                       alt="AI redesigned space"
                       onClick={() => setLightboxOpen(true)}
-                      className="rounded-xl shadow-sm object-cover cursor-pointer hover:opacity-90 transition-opacity w-full max-w-[190px] sm:max-w-full"
+                      className="rounded-xl shadow-sm object-cover cursor-pointer hover:opacity-90 transition-opacity w-full"
                     />
                   </div>
                 </div>
