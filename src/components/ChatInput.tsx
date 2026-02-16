@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 interface ChatInputProps {
   onSend: (message: string, image?: File) => void;
   disabled?: boolean;
+  centered?: boolean;
 }
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
   const [text, setText] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -26,8 +27,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   };
 
-  return (
-    <div className="border-t border-border bg-background px-3 py-2 flex items-center gap-2">
+  const inner = (
+    <div className="bg-card border border-border rounded-2xl shadow-sm px-3 py-2 flex items-center gap-2">
       <input
         ref={fileRef}
         type="file"
@@ -36,9 +37,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         onChange={handleFile}
       />
       <Button
-        variant="ghost"
         size="icon"
-        className="shrink-0 text-muted-foreground"
+        className="shrink-0 bg-accent text-accent-foreground rounded-full h-9 w-9 hover:bg-accent/90"
         onClick={() => fileRef.current?.click()}
         disabled={disabled}
       >
@@ -48,19 +48,29 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        placeholder="Type a message..."
+        placeholder="Describe your space or upload a photo..."
         className="flex-1 bg-secondary rounded-full px-4 py-2 text-sm outline-none placeholder:text-muted-foreground"
         disabled={disabled}
       />
       <Button
         variant="ghost"
         size="icon"
-        className="shrink-0 text-primary"
+        className="shrink-0 text-accent"
         onClick={handleSend}
         disabled={disabled || !text.trim()}
       >
         <SendHorizontal className="h-5 w-5" />
       </Button>
+    </div>
+  );
+
+  if (centered) {
+    return inner;
+  }
+
+  return (
+    <div className="px-3 py-2">
+      {inner}
     </div>
   );
 }

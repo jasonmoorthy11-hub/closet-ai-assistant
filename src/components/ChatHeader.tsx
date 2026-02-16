@@ -7,17 +7,19 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ onNewChat }: ChatHeaderProps) {
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between bg-primary px-4 py-3">
-      <h1 className="text-lg font-bold text-primary-foreground tracking-tight">EasyClosets</h1>
+    <div className="flex items-center justify-between bg-secondary/50 border-b border-border px-4 py-2">
+      <span className="text-sm font-medium text-muted-foreground">
+        AI Design Assistant
+      </span>
       <Button
         variant="ghost"
         size="sm"
         onClick={onNewChat}
-        className="text-primary-foreground hover:bg-primary-foreground/10"
+        className="text-accent hover:bg-accent/10 h-7 text-xs"
       >
-        <Plus className="h-4 w-4 mr-1" />
+        <Plus className="h-3.5 w-3.5 mr-1" />
         New Chat
       </Button>
-    </header>
+    </div>
   );
 }

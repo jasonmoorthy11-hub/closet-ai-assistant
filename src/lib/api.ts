@@ -1,4 +1,4 @@
-export const BASE_URL = "http://localhost:8000";
+export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export interface ChatMessage {
   id: string;
@@ -6,31 +6,96 @@ export interface ChatMessage {
   content: string;
   imageUrl?: string;
   quickReplies?: string[];
+  imageError?: string;
+}
+
+// Track conversation ID across messages
+let conversationId: string | null = null;
+
+export function resetConversation() {
+  conversationId = null;
+}
+
+export async function approveDesign(): Promise<{ status: string; message: string }> {
+  try {
+    if (!conversationId) {
+      return { status: "error", message: "No active conversation." };
+    }
+    const res = await fetch(`${BASE_URL}/approve-design`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conversation_id: conversationId }),
+    });
+    return await res.json();
+  } catch {
+    return { status: "error", message: "Failed to approve design." };
+  }
 }
 
 export async function sendMessage(message: string, imageFile?: File): Promise<ChatMessage> {
-  const formData = new FormData();
-  formData.append("message", message);
-  if (imageFile) {
-    formData.append("image", imageFile);
-  }
-
   try {
-    const res = await fetch(`${BASE_URL}/chat`, {
-      method: "POST",
-      body: formData,
-    });
-    if (!res.ok) throw new Error("API error");
-    return await res.json();
-  } catch {
-    // Fallback for demo when API is unavailable
+    let data;
+
+    if (imageFile) {
+      // Use multipart endpoint for image uploads
+      const formData = new FormData();
+      formData.append("message", message || "Here's a photo of my space");
+      if (conversationId) {
+        formData.append("conversation_id", conversationId);
+      }
+      formData.append("file", imageFile);
+
+      const res = await fetch(`${BASE_URL}/chat-with-image`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("API error");
+      data = await res.json();
+    } else {
+      // Use JSON endpoint for text messages
+      const body: Record<string, string> = { message };
+      if (conversationId) {
+        body.conversation_id = conversationId;
+      }
+
+      const res = await fetch(`${BASE_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("API error");
+      data = await res.json();
+    }
+
+    // Store conversation ID for continuity
+    if (data.conversation_id) {
+      conversationId = data.conversation_id;
+    }
+
+    // Build image URL (backend returns relative paths)
+    let imageUrl: string | undefined;
+    if (data.image_url) {
+      imageUrl = data.image_url.startsWith("http")
+        ? data.image_url
+        : `${BASE_URL}${data.image_url}`;
+    }
+
     return {
       id: crypto.randomUUID(),
       role: "assistant",
-      content: imageFile
-        ? "Great photo! I can see your space has a lot of potential. What style are you thinking — modern, traditional, or something in between?"
-        : "I'd love to help you design the perfect closet! Upload a photo of your space to get started, or tell me about your storage needs.",
-      quickReplies: ["Modern style", "Walk-in closet", "Small space solutions", "Show me examples"],
+      content: data.message,
+      imageUrl,
+      quickReplies: data.quick_replies || undefined,
+      imageError: data.image_error || undefined,
+    };
+  } catch (error) {
+    console.error("API call failed:", error);
+    // Fallback for when API is unavailable
+    return {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: "I'm having trouble connecting right now. Please make sure the backend is running and try again.",
+      quickReplies: ["Try again"],
     };
   }
 }

@@ -6,7 +6,7 @@ const STEPS = [
   {
     icon: Camera,
     title: "Upload a photo of your space",
-    description: "Snap a photo of your closet, pantry, or any space you want to transform.",
+    description: "Snap a photo of your closet or space — our AI will redesign it instantly with custom EasyClosets cabinetry.",
   },
   {
     icon: MessageSquare,
@@ -30,20 +30,20 @@ export function OnboardingOverlay({ onDismiss }: OnboardingOverlayProps) {
   const Icon = current.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-primary/95 px-8 text-primary-foreground">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#3D2E22]/95 px-8 text-white">
       <button
         onClick={onDismiss}
-        className="absolute top-4 right-4 text-sm text-primary-foreground/70 hover:text-primary-foreground"
+        className="absolute top-4 right-4 text-sm text-white/70 hover:text-white"
       >
         Skip
       </button>
 
       <div className="flex flex-col items-center text-center max-w-xs">
-        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-primary-foreground/10">
+        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-white/10">
           <Icon className="h-10 w-10" />
         </div>
         <h2 className="text-2xl font-bold mb-3">{current.title}</h2>
-        <p className="text-primary-foreground/80 text-sm leading-relaxed">{current.description}</p>
+        <p className="text-white/80 text-sm leading-relaxed">{current.description}</p>
       </div>
 
       {/* Dots */}
@@ -51,7 +51,7 @@ export function OnboardingOverlay({ onDismiss }: OnboardingOverlayProps) {
         {STEPS.map((_, i) => (
           <div
             key={i}
-            className={`h-2 w-2 rounded-full ${i === step ? "bg-primary-foreground" : "bg-primary-foreground/30"}`}
+            className={`h-2 w-2 rounded-full ${i === step ? "bg-white" : "bg-white/30"}`}
           />
         ))}
       </div>
@@ -61,7 +61,7 @@ export function OnboardingOverlay({ onDismiss }: OnboardingOverlayProps) {
           if (step < STEPS.length - 1) setStep(step + 1);
           else onDismiss();
         }}
-        className="mt-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full px-8"
+        className="mt-8 bg-accent text-white hover:bg-accent/90 rounded-full px-8"
       >
         {step < STEPS.length - 1 ? "Next" : "Get Started"}
       </Button>

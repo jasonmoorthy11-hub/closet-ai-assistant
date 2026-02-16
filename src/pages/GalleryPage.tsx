@@ -2,22 +2,37 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CATEGORIES, TEMPLATES } from "@/lib/templates";
 
+const CATEGORY_MAP: Record<string, string> = {
+  "All": "all",
+  "Closet": "closet",
+  "Pantry": "pantry",
+  "Laundry": "laundry",
+  "Garage": "garage",
+  "More Spaces": "more",
+};
+
 export default function GalleryPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const navigate = useNavigate();
 
-  const filtered = activeFilter === "All"
+  const filterKey = CATEGORY_MAP[activeFilter] || "all";
+  const filtered = filterKey === "all"
     ? TEMPLATES
-    : TEMPLATES.filter((t) => t.category.toLowerCase() === activeFilter.toLowerCase());
+    : TEMPLATES.filter((t) => t.category === filterKey);
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex-1 bg-background">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-30 bg-primary px-4 py-3">
-        <h1 className="text-lg font-bold text-primary-foreground tracking-tight">Inspiration Gallery</h1>
-      </header>
+      <div className="bg-secondary/50 py-12 px-4 text-center">
+        <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-3">
+          Idea Center
+        </h1>
+        <p className="text-muted-foreground max-w-lg mx-auto">
+          Browse real customer projects and professional designs for inspiration.
+        </p>
+      </div>
 
-      <div className="flex-1 overflow-y-auto pt-14 pb-16 px-4">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Filter chips */}
         <div className="flex gap-2 overflow-x-auto py-3 scrollbar-hide">
           {CATEGORIES.map((cat) => (
@@ -26,8 +41,8 @@ export default function GalleryPage() {
               onClick={() => setActiveFilter(cat)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium border transition-colors ${
                 activeFilter === cat
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary"
+                  ? "bg-accent text-accent-foreground border-accent"
+                  : "bg-background text-foreground border-border hover:border-accent"
               }`}
             >
               {cat}
@@ -36,23 +51,36 @@ export default function GalleryPage() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 gap-3 pb-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-8">
           {filtered.map((template) => (
-            <button
+            <div
               key={template.id}
-              onClick={() => navigate(`/?template=${encodeURIComponent(template.title)}`)}
-              className="group relative overflow-hidden rounded-lg aspect-[4/3]"
+              className="group relative overflow-hidden rounded-xl border border-border bg-card"
             >
-              <img
-                src={template.imageUrl}
-                alt={template.title}
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                <p className="text-xs font-medium text-white">{template.title}</p>
+              <div className="relative aspect-[4/3]">
+                <img
+                  src={template.imageUrl}
+                  alt={template.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  loading="lazy"
+                />
+                {/* Category badge */}
+                <span className="absolute top-2 left-2 bg-foreground/70 text-background text-[10px] font-medium px-2 py-0.5 rounded-full capitalize">
+                  {template.category === "more" ? "More Spaces" : template.category}
+                </span>
               </div>
-            </button>
+              <div className="p-3">
+                <p className="text-sm font-medium text-foreground mb-2">
+                  {template.title}
+                </p>
+                <button
+                  onClick={() => navigate(`/?template=${encodeURIComponent(template.title)}`)}
+                  className="text-xs font-medium text-accent hover:text-accent/80 transition-colors"
+                >
+                  Design something like this &rarr;
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>

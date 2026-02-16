@@ -1,82 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 210 29% 24%;
+    --background: 39 44% 96%;
+    --foreground: 27 28% 19%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 29% 24%;
+    --card: 33 70% 97%;
+    --card-foreground: 27 28% 19%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 29% 24%;
+    --popover: 33 70% 97%;
+    --popover-foreground: 27 28% 19%;
 
     --primary: 210 52% 23%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 210 52% 23%;
+    --secondary: 35 39% 90%;
+    --secondary-foreground: 27 28% 19%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 33 31% 87%;
+    --muted-foreground: 29 13% 48%;
 
-    --accent: 220 14% 96%;
-    --accent-foreground: 210 52% 23%;
+    --accent: 35 32% 41%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 210 52% 23%;
+    --border: 33 28% 83%;
+    --input: 33 28% 83%;
+    --ring: 35 32% 41%;
 
     --radius: 0.75rem;
 
-    --ai-bubble: 220 14% 96%;
-    --ai-bubble-foreground: 210 29% 24%;
+    --ai-bubble: 33 48% 93%;
+    --ai-bubble-foreground: 27 28% 19%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 210 29% 10%;
-    --foreground: 0 0% 95%;
-    --card: 210 29% 13%;
-    --card-foreground: 0 0% 95%;
-    --popover: 210 29% 13%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 210 52% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 20% 18%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 210 20% 18%;
-    --muted-foreground: 215 16% 60%;
-    --accent: 210 20% 18%;
-    --accent-foreground: 0 0% 95%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 95%;
-    --border: 210 20% 18%;
-    --input: 210 20% 18%;
-    --ring: 210 52% 45%;
-    --ai-bubble: 210 20% 18%;
-    --ai-bubble-foreground: 0 0% 95%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 39 44% 96%;
+    --sidebar-foreground: 27 28% 19%;
+    --sidebar-primary: 210 52% 23%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 35 32% 41%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 33 28% 83%;
+    --sidebar-ring: 35 32% 41%;
   }
 }
 
@@ -87,5 +57,6 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 }
