@@ -1,22 +1,22 @@
 import { useState } from "react";
-import { Camera, MessageSquare, Sparkles } from "lucide-react";
+import { Compass, Camera, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STEPS = [
   {
-    icon: Camera,
-    title: "Upload a photo of your space",
-    description: "Snap a photo of your closet or space — our AI will redesign it instantly with custom EasyClosets cabinetry.",
+    icon: Compass,
+    title: "Explore & Get Inspired",
+    description: "Browse Our Solutions for product ideas and the Idea Center for real design inspiration.",
   },
   {
-    icon: MessageSquare,
-    title: "Chat about your style and needs",
-    description: "Tell us your preferences — modern, traditional, walk-in, reach-in, and more.",
+    icon: Camera,
+    title: "Upload & Design with AI",
+    description: "Snap a photo of your space and our AI will redesign it with custom EasyClosets cabinetry.",
   },
   {
     icon: Sparkles,
-    title: "Get AI-generated design inspiration",
-    description: "Receive custom design concepts tailored to your space and style.",
+    title: "Your Custom Design",
+    description: "Get AI-generated designs, refine details through chat, and bring your dream space to life.",
   },
 ];
 

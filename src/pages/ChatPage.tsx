@@ -19,6 +19,7 @@ const WELCOME_MESSAGE: ChatMessage = {
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [loading, setLoading] = useState(false);
+  const [loadingWithImage, setLoadingWithImage] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem(ONBOARDING_KEY)
   );
@@ -56,10 +57,12 @@ export default function ChatPage() {
     };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
+    setLoadingWithImage(!!image);
 
     const reply = await sendMessage(text, image);
     setMessages((prev) => [...prev, reply]);
     setLoading(false);
+    setLoadingWithImage(false);
   }, []);
 
   const handleQuickReply = useCallback((text: string) => {
@@ -172,17 +175,35 @@ export default function ChatPage() {
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
-        {messages.slice(1).map((msg) => (
-          <ChatBubble key={msg.id} message={msg} onQuickReply={handleQuickReply} />
-        ))}
+        {messages.slice(1).map((msg, i) => {
+          const allMsgs = messages.slice(1);
+          let userPhotoUrl: string | undefined;
+          if (msg.role === "assistant" && msg.imageUrl && i > 0) {
+            const prev = allMsgs[i - 1];
+            if (prev.role === "user" && prev.imageUrl) {
+              userPhotoUrl = prev.imageUrl;
+            }
+          }
+          return <ChatBubble key={msg.id} message={msg} onQuickReply={handleQuickReply} userPhotoUrl={userPhotoUrl} />;
+        })}
         {loading && (
           <div className="flex justify-start mb-3">
             <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="flex gap-1">
-                <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
-                <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
-                <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
-              </div>
+              {loadingWithImage ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+                  <span className="text-sm text-muted-foreground">Designing your space...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce" />
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Thinking...</span>
+                </div>
+              )}
             </div>
           </div>
         )}

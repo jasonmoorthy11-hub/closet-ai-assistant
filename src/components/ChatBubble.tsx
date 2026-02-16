@@ -4,11 +4,13 @@ import { ChatMessage } from "@/lib/api";
 interface ChatBubbleProps {
   message: ChatMessage;
   onQuickReply?: (text: string) => void;
+  userPhotoUrl?: string;
 }
 
-export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
+export function ChatBubble({ message, onQuickReply, userPhotoUrl }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const showBeforeAfter = !isUser && !!userPhotoUrl && !!message.imageUrl;
 
   return (
     <>
@@ -27,7 +29,30 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
                 <span>Image generation wasn't successful this time.</span>
               </div>
             )}
-            {message.imageUrl && (
+            {showBeforeAfter ? (
+              <div className="mb-2">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1 min-w-0">
+                    <span className="inline-block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70 bg-muted/50 rounded px-1.5 py-0.5 mb-1">Before</span>
+                    <img
+                      src={userPhotoUrl}
+                      alt="Original space"
+                      onClick={() => setLightboxOpen(true)}
+                      className="rounded-xl shadow-sm object-cover cursor-pointer hover:opacity-90 transition-opacity w-full max-w-[190px] sm:max-w-full"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="inline-block text-[10px] font-semibold uppercase tracking-wide text-accent bg-accent/10 rounded px-1.5 py-0.5 mb-1">After</span>
+                    <img
+                      src={message.imageUrl}
+                      alt="AI redesigned space"
+                      onClick={() => setLightboxOpen(true)}
+                      className="rounded-xl shadow-sm object-cover cursor-pointer hover:opacity-90 transition-opacity w-full max-w-[190px] sm:max-w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : message.imageUrl ? (
               <img
                 src={message.imageUrl}
                 alt="Shared image"
@@ -38,7 +63,7 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
                     : "w-full max-w-[400px]"
                 }`}
               />
-            )}
+            ) : null}
             <p>{message.content}</p>
           </div>
 
@@ -59,17 +84,38 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
       </div>
 
       {/* Lightbox */}
-      {lightboxOpen && message.imageUrl && (
+      {lightboxOpen && (message.imageUrl || userPhotoUrl) && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-6"
           onClick={() => setLightboxOpen(false)}
         >
-          <img
-            src={message.imageUrl}
-            alt="Expanded image"
-            className="max-w-[90vw] max-h-[85vh] rounded-2xl shadow-2xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {showBeforeAfter ? (
+            <div className="flex flex-col sm:flex-row gap-4 items-center" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs font-semibold uppercase tracking-wide text-white/70">Before</span>
+                <img
+                  src={userPhotoUrl}
+                  alt="Original space"
+                  className="max-w-[42vw] max-h-[80vh] rounded-2xl shadow-2xl object-contain"
+                />
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs font-semibold uppercase tracking-wide text-white">After</span>
+                <img
+                  src={message.imageUrl}
+                  alt="AI redesigned space"
+                  className="max-w-[42vw] max-h-[80vh] rounded-2xl shadow-2xl object-contain"
+                />
+              </div>
+            </div>
+          ) : (
+            <img
+              src={message.imageUrl}
+              alt="Expanded image"
+              className="max-w-[90vw] max-h-[85vh] rounded-2xl shadow-2xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
     </>
