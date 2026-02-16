@@ -92,7 +92,7 @@ export default function ChatPage() {
   // Hero landing state
   if (showHero) {
     return (
-      <div className="flex-1 flex flex-col bg-background">
+      <div className="flex-1 flex flex-col bg-background min-h-0 overflow-auto">
         {showOnboarding && <OnboardingOverlay onDismiss={handleDismissOnboarding} />}
         <ChatHeader onNewChat={handleNewChat} />
 
@@ -104,35 +104,35 @@ export default function ChatPage() {
           onChange={handleHeroFileChange}
         />
 
-        <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-6">
           {/* Headline */}
-          <h3 className="font-serif text-2xl md:text-3xl text-foreground mb-2">Design Your Dream Space</h3>
-          <p className="text-muted-foreground text-sm text-center max-w-sm mb-8">
+          <h3 className="font-serif text-2xl md:text-3xl text-foreground mb-2 text-center">Design Your Dream Space</h3>
+          <p className="text-muted-foreground text-sm text-center max-w-sm mb-6">
             Upload a photo and I'll redesign it with custom EasyClosets cabinetry
           </p>
 
           {/* Centered input */}
-          <div className="w-full max-w-lg mb-6">
+          <div className="w-full max-w-lg mb-4">
             <ChatInput onSend={handleSend} disabled={loading} centered />
           </div>
 
           {/* Action cards */}
-          <div className="flex gap-3 w-full max-w-lg mb-6">
+          <div className="flex gap-3 w-full max-w-lg mb-4">
             <button
               onClick={() => heroFileRef.current?.click()}
-              className="flex-1 flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 hover:border-accent transition-colors"
+              className="flex-1 flex items-center gap-3 bg-card border border-border rounded-xl px-3 py-2.5 hover:border-accent transition-colors"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                <Camera className="h-5 w-5 text-accent" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 shrink-0">
+                <Camera className="h-4 w-4 text-accent" />
               </div>
               <span className="text-sm font-medium text-foreground">Upload a photo</span>
             </button>
             <button
               onClick={() => navigate("/idea-center")}
-              className="flex-1 flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 hover:border-accent transition-colors"
+              className="flex-1 flex items-center gap-3 bg-card border border-border rounded-xl px-3 py-2.5 hover:border-accent transition-colors"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                <LayoutGrid className="h-5 w-5 text-accent" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 shrink-0">
+                <LayoutGrid className="h-4 w-4 text-accent" />
               </div>
               <span className="text-sm font-medium text-foreground">Browse inspiration</span>
             </button>
@@ -171,7 +171,7 @@ export default function ChatPage() {
       />
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
         {messages.slice(1).map((msg) => (
           <ChatBubble key={msg.id} message={msg} onQuickReply={handleQuickReply} />
         ))}
@@ -189,7 +189,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input pinned to bottom */}
-      <div className="sticky bottom-0 z-20 bg-background">
+      <div className="shrink-0 bg-background pb-[env(safe-area-inset-bottom)]">
         <ChatInput onSend={handleSend} disabled={loading} />
       </div>
     </div>

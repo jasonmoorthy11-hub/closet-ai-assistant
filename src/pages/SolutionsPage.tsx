@@ -48,7 +48,7 @@ const MATERIALS = [
 
 export default function SolutionsPage() {
   return (
-    <div className="flex-1 bg-background">
+    <div className="flex-1 bg-background overflow-auto min-h-0">
       {/* Hero */}
       <div className="bg-secondary/50 py-12 px-4 text-center">
         <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-3">
