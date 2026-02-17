@@ -5,11 +5,21 @@ import { ChatMessage } from "@/lib/api";
 interface ChatBubbleProps {
   message: ChatMessage;
   onQuickReply?: (text: string) => void;
+  animate?: boolean;
 }
 
-export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
+export function ChatBubble({ message, onQuickReply, animate }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [typedChars, setTypedChars] = useState(animate ? 0 : message.content.length);
+  const doneTyping = typedChars >= message.content.length;
+
+  // Typewriter effect for AI messages
+  useEffect(() => {
+    if (!animate || isUser || doneTyping) return;
+    const timer = setTimeout(() => setTypedChars((c) => c + 1), 18);
+    return () => clearTimeout(timer);
+  }, [animate, isUser, doneTyping, typedChars]);
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -49,10 +59,15 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
                 }`}
               />
             )}
-            <p>{message.content}</p>
+            <p>
+              {isUser ? message.content : message.content.slice(0, typedChars)}
+              {!isUser && !doneTyping && (
+                <span className="inline-block w-[2px] h-[1em] bg-ai-bubble-foreground/50 ml-[1px] align-middle animate-pulse" />
+              )}
+            </p>
           </div>
 
-          {!isUser && message.quickReplies && message.quickReplies.length > 0 && (
+          {!isUser && doneTyping && message.quickReplies && message.quickReplies.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {message.quickReplies.map((reply) => (
                 <button
