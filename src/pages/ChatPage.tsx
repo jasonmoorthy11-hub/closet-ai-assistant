@@ -9,27 +9,37 @@ import { ChatMessage, sendMessage, resetConversation } from "@/lib/api";
 
 const ONBOARDING_KEY = "easyclosets_onboarding_done";
 
-const LOADING_MESSAGES = [
-  "Straightening the hangers",
-  "Color-coordinating your wardrobe",
-  "Measuring twice, cutting once",
-  "Making Marie Kondo proud",
-  "Debating between white and ivory",
-  "Finding the missing sock",
-  "Folding the fitted sheets",
-  "Organizing by season and color",
-  "Choosing the perfect hardware",
-  "Spacing hangers exactly 2 inches apart",
-  "Alphabetizing the spice rack",
-  "Fluffing the throw pillows",
-  "Consulting the feng shui guide",
-  "Ironing out the details",
-  "Matching the drawer pulls",
-  "Rethinking the shoe situation",
-  "Calculating optimal shelf spacing",
-  "Pondering the perfect pantry",
-  "Aligning everything just so",
-  "Admiring the before photo",
+// Messages shown when the user uploaded a photo (image edit/gen path — takes 15-30s)
+const PHOTO_LOADING_MESSAGES = [
+  "Studying your space",
+  "Reimagining the layout",
+  "Picking the perfect cabinetry",
+  "Choosing the right finish",
+  "Installing virtual shelving",
+  "Adjusting the lighting",
+  "Rendering your new design",
+  "Adding the finishing touches",
+  "Tidying up your belongings",
+  "Measuring wall to wall",
+  "Swapping out the old shelves",
+  "Making it magazine-worthy",
+  "Fitting everything just right",
+  "Polishing the hardware",
+  "Stepping back to admire the work",
+];
+
+// Messages shown for text-only responses (chat path — takes 2-5s)
+const TEXT_LOADING_MESSAGES = [
+  "Thinking about your space",
+  "Consulting the design guide",
+  "Considering the options",
+  "Pulling up some ideas",
+  "Checking the finish samples",
+  "Sketching a few layouts",
+  "Browsing the catalog",
+  "Crunching the dimensions",
+  "Matching styles to your vibe",
+  "Weighing the possibilities",
 ];
 
 const SPINNER_CHARS = ["·", "✻", "✽", "✶", "✳", "✢"];
@@ -49,23 +59,26 @@ export default function ChatPage() {
   );
   const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
   const [spinnerIndex, setSpinnerIndex] = useState(0);
+  const [loadingWithPhoto, setLoadingWithPhoto] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const heroFileRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Cycle loading messages sequentially
+  // Cycle loading messages sequentially from the appropriate pool
+  const loadingMessages = loadingWithPhoto ? PHOTO_LOADING_MESSAGES : TEXT_LOADING_MESSAGES;
   useEffect(() => {
     if (!loading) {
       setLoadingMsgIndex(0);
       return;
     }
+    const pool = loadingWithPhoto ? PHOTO_LOADING_MESSAGES : TEXT_LOADING_MESSAGES;
     const interval = setInterval(() => {
-      setLoadingMsgIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+      setLoadingMsgIndex((i) => (i + 1) % pool.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [loading]);
+  }, [loading, loadingWithPhoto]);
 
   // Spinner character cycling
   useEffect(() => {
@@ -110,6 +123,7 @@ export default function ChatPage() {
     };
     setMessages((prev) => [...prev, userMsg]);
     if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    setLoadingWithPhoto(!!image);
     setLoading(true);
 
     const reply = await sendMessage(text, image);
@@ -245,7 +259,7 @@ export default function ChatPage() {
                 {SPINNER_CHARS[spinnerIndex]}
               </span>
               <span className="text-xs text-muted-foreground italic">
-                {LOADING_MESSAGES[loadingMsgIndex]}
+                {loadingMessages[loadingMsgIndex % loadingMessages.length]}
               </span>
             </div>
           </div>
