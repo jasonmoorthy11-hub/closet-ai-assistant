@@ -48,7 +48,6 @@ export default function ChatPage() {
     () => !localStorage.getItem(ONBOARDING_KEY)
   );
   const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
-  const [typedChars, setTypedChars] = useState(0);
   const [spinnerIndex, setSpinnerIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const heroFileRef = useRef<HTMLInputElement>(null);
@@ -56,27 +55,17 @@ export default function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Typewriter: type out current message char by char, then pause, then advance
+  // Cycle loading messages sequentially
   useEffect(() => {
     if (!loading) {
       setLoadingMsgIndex(0);
-      setTypedChars(0);
       return;
     }
-    const fullText = LOADING_MESSAGES[loadingMsgIndex];
-    if (typedChars < fullText.length) {
-      // Still typing — add next character
-      const timer = setTimeout(() => setTypedChars((c) => c + 1), 35);
-      return () => clearTimeout(timer);
-    } else {
-      // Fully typed — pause then advance to next message
-      const timer = setTimeout(() => {
-        setLoadingMsgIndex((i) => (i + 1) % LOADING_MESSAGES.length);
-        setTypedChars(0);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [loading, loadingMsgIndex, typedChars]);
+    const interval = setInterval(() => {
+      setLoadingMsgIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   // Spinner character cycling
   useEffect(() => {
@@ -256,10 +245,7 @@ export default function ChatPage() {
                 {SPINNER_CHARS[spinnerIndex]}
               </span>
               <span className="text-xs text-muted-foreground italic">
-                {LOADING_MESSAGES[loadingMsgIndex].slice(0, typedChars)}
-                {typedChars < LOADING_MESSAGES[loadingMsgIndex].length && (
-                  <span className="inline-block w-[1px] h-3 bg-muted-foreground/60 ml-[1px] align-middle animate-pulse" />
-                )}
+                {LOADING_MESSAGES[loadingMsgIndex]}
               </span>
             </div>
           </div>
