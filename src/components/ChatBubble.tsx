@@ -5,16 +5,28 @@ import { ChatMessage } from "@/lib/api";
 interface ChatBubbleProps {
   message: ChatMessage;
   onQuickReply?: (text: string) => void;
+  animate?: boolean;
   onContentReady?: () => void;
 }
 
-export function ChatBubble({ message, onQuickReply, onContentReady }: ChatBubbleProps) {
+export function ChatBubble({ message, onQuickReply, animate, onContentReady }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
+  // Word-by-word typewriter for AI messages
+  const words = message.content.split(" ");
+  const [typedWords, setTypedWords] = useState(animate ? 0 : words.length);
+  const doneTyping = typedWords >= words.length;
+
   useEffect(() => {
-    if (onContentReady) onContentReady();
-  }, [onContentReady]);
+    if (!animate || isUser || doneTyping) return;
+    const timer = setTimeout(() => setTypedWords((w) => w + 1), 40);
+    return () => clearTimeout(timer);
+  }, [animate, isUser, doneTyping, typedWords]);
+
+  useEffect(() => {
+    if (doneTyping && onContentReady) onContentReady();
+  }, [doneTyping, onContentReady]);
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -30,10 +42,10 @@ export function ChatBubble({ message, onQuickReply, onContentReady }: ChatBubble
       <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3`}>
         <div className="max-w-[85%] flex flex-col gap-2">
           <div
-            className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+            className={`text-sm leading-relaxed ${
               isUser
-                ? "bg-primary text-primary-foreground rounded-br-md"
-                : "bg-ai-bubble text-ai-bubble-foreground rounded-bl-md"
+                ? "rounded-2xl rounded-br-md px-4 py-2.5 bg-primary text-primary-foreground"
+                : "px-1 py-1 text-foreground"
             }`}
           >
             {message.imageError && !message.imageUrl && (
@@ -55,10 +67,19 @@ export function ChatBubble({ message, onQuickReply, onContentReady }: ChatBubble
                 }`}
               />
             )}
-            <p>{message.content}</p>
+            <p>
+              {isUser ? message.content : (
+                <>
+                  <span>{words.slice(0, typedWords).join(" ")}</span>
+                  {!doneTyping && (
+                    <span className="invisible">{" " + words.slice(typedWords).join(" ")}</span>
+                  )}
+                </>
+              )}
+            </p>
           </div>
 
-          {!isUser && message.quickReplies && message.quickReplies.length > 0 && (
+          {!isUser && doneTyping && message.quickReplies && message.quickReplies.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {message.quickReplies.map((reply) => (
                 <button

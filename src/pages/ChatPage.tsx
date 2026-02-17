@@ -240,14 +240,18 @@ export default function ChatPage() {
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {messages.slice(1).map((msg) => (
+        {messages.slice(1).map((msg, i, arr) => {
+          const isLastAi = msg.role === "assistant" && i === arr.length - 1;
+          return (
             <ChatBubble
               key={msg.id}
               message={msg}
               onQuickReply={handleQuickReply}
+              animate={isLastAi}
               onContentReady={scrollToBottom}
             />
-        ))}
+          );
+        })}
         {loading && (
           <div className="flex justify-start mb-3">
             <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2.5">
