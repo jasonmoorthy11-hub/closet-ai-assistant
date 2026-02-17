@@ -251,7 +251,10 @@ export default function ChatPage() {
               <span className="loading-spinner text-accent text-xs" aria-hidden="true">
                 {SPINNER_CHAR}
               </span>
-              <span className="loading-shimmer text-xs italic font-medium">
+              <span
+                key={loadingMsgIndex}
+                className="loading-shimmer loading-message-fade text-xs italic font-medium"
+              >
                 {loadingMessages[loadingMsgIndex % loadingMessages.length]}
               </span>
             </div>

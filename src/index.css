@@ -61,28 +61,26 @@
   }
 }
 
-/* Loading shimmer — bright gleam that sweeps across text */
+/* Loading shimmer — subtle gleam that sweeps across text */
 @keyframes shimmer {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
+  0% { background-position: 100% center; }
+  100% { background-position: -100% center; }
 }
 
 .loading-shimmer {
   background: linear-gradient(
     90deg,
     hsl(var(--muted-foreground)) 0%,
-    hsl(var(--muted-foreground)) 40%,
-    hsl(0 0% 100%) 48%,
-    hsl(35 60% 75%) 50%,
-    hsl(0 0% 100%) 52%,
-    hsl(var(--muted-foreground)) 60%,
+    hsl(var(--muted-foreground)) 42%,
+    hsl(var(--foreground)) 50%,
+    hsl(var(--muted-foreground)) 58%,
     hsl(var(--muted-foreground)) 100%
   );
-  background-size: 250% 100%;
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer 3s ease-in-out infinite;
+  animation: shimmer 4s ease-in-out infinite;
 }
 
 /* Spinner — smooth continuous rotation */
@@ -94,4 +92,14 @@
 .loading-spinner {
   display: inline-block;
   animation: spin-smooth 1.2s linear infinite;
+}
+
+/* Fade in for loading message transitions */
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.loading-message-fade {
+  animation: fade-in 0.4s ease-in;
 }
