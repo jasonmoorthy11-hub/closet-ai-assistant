@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export interface ChatMessage {
@@ -90,7 +92,9 @@ export async function sendMessage(message: string, imageFile?: File): Promise<Ch
     };
   } catch (error) {
     console.error("API call failed:", error);
-    // Fallback for when API is unavailable
+    toast.error("Connection issue", {
+      description: "Couldn't reach the server. Please try again in a moment.",
+    });
     return {
       id: crypto.randomUUID(),
       role: "assistant",

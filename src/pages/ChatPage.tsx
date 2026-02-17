@@ -9,6 +9,19 @@ import { ChatMessage, sendMessage, resetConversation } from "@/lib/api";
 
 const ONBOARDING_KEY = "easyclosets_onboarding_done";
 
+const LOADING_MESSAGES = [
+  "Straightening the hangers...",
+  "Color-coordinating your wardrobe...",
+  "Measuring twice, cutting once...",
+  "Making Marie Kondo proud...",
+  "Debating between white and ivory...",
+  "Finding the missing sock...",
+  "Folding the fitted sheets...",
+  "Organizing by season and color...",
+  "Choosing the perfect hardware...",
+  "Spacing hangers exactly 2 inches apart...",
+];
+
 const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "assistant",
@@ -22,11 +35,31 @@ export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem(ONBOARDING_KEY)
   );
+  const [loadingMsgIndex, setLoadingMsgIndex] = useState(
+    () => Math.floor(Math.random() * LOADING_MESSAGES.length)
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const heroFileRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // Cycle loading messages
+  useEffect(() => {
+    if (!loading) {
+      setLoadingMsgIndex(Math.floor(Math.random() * LOADING_MESSAGES.length));
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingMsgIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  // Set page title
+  useEffect(() => {
+    document.title = "AI Design Assistant | EasyClosets";
+  }, []);
 
   // Handle template prefill
   useEffect(() => {
@@ -180,6 +213,9 @@ export default function ChatPage() {
         {loading && (
           <div className="flex justify-start mb-3">
             <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3">
+              <p className="text-xs text-muted-foreground mb-1.5 italic">
+                {LOADING_MESSAGES[loadingMsgIndex]}
+              </p>
               <div className="flex gap-1">
                 <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
                 <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />

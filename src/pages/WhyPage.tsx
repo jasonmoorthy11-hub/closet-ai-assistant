@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Shield, Truck, Wrench, Leaf, Scissors, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,8 +54,12 @@ const TESTIMONIALS = [
 ];
 
 export default function WhyPage() {
+  useEffect(() => {
+    document.title = "Why EasyClosets? | EasyClosets";
+  }, []);
+
   return (
-    <div className="flex-1 bg-background">
+    <div className="flex-1 bg-background overflow-auto">
       {/* Hero */}
       <div className="bg-secondary/50 py-12 px-4 text-center">
         <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-3">

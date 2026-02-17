@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -47,6 +48,10 @@ const MATERIALS = [
 ];
 
 export default function SolutionsPage() {
+  useEffect(() => {
+    document.title = "Our Solutions | EasyClosets";
+  }, []);
+
   return (
     <div className="flex-1 bg-background overflow-auto">
       {/* Hero */}
@@ -97,7 +102,7 @@ export default function SolutionsPage() {
                   >
                     <Button
                       size="sm"
-                      className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       Design Yours
                     </Button>

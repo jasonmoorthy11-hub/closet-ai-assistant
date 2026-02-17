@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { ChatMessage } from "@/lib/api";
 
 interface ChatBubbleProps {
@@ -75,6 +76,13 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
           role="dialog"
           aria-label="Expanded image view"
         >
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            aria-label="Close image"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <img
             src={message.imageUrl}
             alt="Full-size view"

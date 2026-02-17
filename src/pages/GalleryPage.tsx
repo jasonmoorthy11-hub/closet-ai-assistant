@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CATEGORIES, TEMPLATES } from "@/lib/templates";
 
@@ -14,6 +14,10 @@ const CATEGORY_MAP: Record<string, string> = {
 export default function GalleryPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Idea Center | EasyClosets";
+  }, []);
 
   const filterKey = CATEGORY_MAP[activeFilter] || "all";
   const filtered = filterKey === "all"
