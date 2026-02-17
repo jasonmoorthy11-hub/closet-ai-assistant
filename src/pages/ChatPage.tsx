@@ -9,40 +9,40 @@ import { ChatMessage, sendMessage, resetConversation } from "@/lib/api";
 
 const ONBOARDING_KEY = "easyclosets_onboarding_done";
 
-// Messages shown when the user uploaded a photo (image edit/gen path — takes 15-30s)
+// Photo upload path (image edit/gen — 15-30s, user sees many)
 const PHOTO_LOADING_MESSAGES = [
-  "Judging your closet (respectfully)",
-  "Ok wow there's a lot going on in here",
-  "Pretending I didn't see that pile",
-  "Finding a home for every single shoe",
-  "Your wire hangers just filed for divorce",
-  "Marie Kondo would be so proud of us right now",
-  "This closet has potential... buried under laundry",
-  "Evicting the floor pile, effective immediately",
-  "Adding shelves where dreams go to thrive",
-  "Giving your wardrobe the glow-up it deserves",
-  "No because this is going to look incredible",
-  "Measuring twice because I'm an overachiever",
-  "The before photo is... brave. Respect.",
-  "Your future self is going to love this",
-  "Hold on, I'm having a design breakthrough",
-  "Sorry, got distracted admiring my own work",
-  "This is the closet equivalent of a movie makeover",
-  "Replacing vibes with actual organization",
+  "De-clutterifying",
+  "Shelf-manifesting",
+  "Closet-whispering",
+  "Aggressively organizing",
+  "Space-maximizing",
+  "Hanger-wrangling",
+  "Cabinet-summoning",
+  "Floor-pile-evicting",
+  "Drawer-multiplying",
+  "Glow-up-rendering",
+  "Shoe-wall-fantasizing",
+  "Feng-shui-ing",
+  "Wire-hanger-exorcising",
+  "Before-and-aftering",
+  "Vibe-overhauling",
+  "Hardware-deliberating",
+  "Magazine-worthifying",
+  "Chaos-to-cabinetry-ing",
 ];
 
-// Messages shown for text-only responses (chat path — takes 2-5s)
+// Text chat path (2-5s, user sees 1-2)
 const TEXT_LOADING_MESSAGES = [
-  "Hold on, design brain is warming up",
-  "White or ivory? Don't worry, I'll decide",
-  "Mentally walking through your closet",
-  "One sec, checking all 10 finish options",
-  "Already have three ideas, narrowing it down",
-  "Picturing something you'll actually love",
-  "Thinking about shelves (as one does)",
-  "Resisting the urge to add a shoe wall",
-  "Looking up what 'modern farmhouse' even means",
-  "Trying not to overthink the hardware finish",
+  "Design-brain-activating",
+  "Swatch-consulting",
+  "Shelf-theorizing",
+  "Finish-pondering",
+  "Layout-noodling",
+  "Style-deciphering",
+  "Dimension-crunching",
+  "Option-weighing",
+  "Idea-percolating",
+  "Catalog-spelunking",
 ];
 
 const SPINNER_CHAR = "✶";
