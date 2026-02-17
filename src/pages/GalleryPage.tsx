@@ -46,7 +46,7 @@ export default function GalleryPage() {
               className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium border transition-colors focus:outline-none focus:ring-2 focus:ring-accent ${
                 activeFilter === cat
                   ? "bg-accent text-accent-foreground border-accent"
-                  : "bg-background text-foreground border-border hover:border-accent"
+                  : "bg-background text-foreground border-border hover:border-accent hover:bg-secondary"
               }`}
             >
               {cat}

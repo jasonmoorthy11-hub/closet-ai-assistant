@@ -80,7 +80,7 @@ export default function SolutionsPage() {
                 loading="lazy"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
-                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = "#F0E8DD";
+                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = "hsl(var(--secondary))";
                 }}
               />
               <div className="p-5 flex-1 flex flex-col">

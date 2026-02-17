@@ -97,9 +97,13 @@ export default function ChatPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading, scrollToBottom]);
 
   const handleDismissOnboarding = () => {
     localStorage.setItem(ONBOARDING_KEY, "true");
@@ -242,6 +246,7 @@ export default function ChatPage() {
               message={msg}
               onQuickReply={handleQuickReply}
               animate={isLastAi}
+              onContentReady={scrollToBottom}
             />
           );
         })}

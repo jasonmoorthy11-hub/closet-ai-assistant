@@ -50,7 +50,7 @@ export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
         placeholder="Describe your space or upload a photo..."
-        className="flex-1 bg-secondary rounded-full px-4 py-2 text-sm outline-none placeholder:text-muted-foreground"
+        className="flex-1 bg-secondary rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/50 placeholder:text-muted-foreground"
         disabled={disabled}
       />
       <Button

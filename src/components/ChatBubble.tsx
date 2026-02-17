@@ -6,9 +6,10 @@ interface ChatBubbleProps {
   message: ChatMessage;
   onQuickReply?: (text: string) => void;
   animate?: boolean;
+  onContentReady?: () => void;
 }
 
-export function ChatBubble({ message, onQuickReply, animate }: ChatBubbleProps) {
+export function ChatBubble({ message, onQuickReply, animate, onContentReady }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [typedChars, setTypedChars] = useState(animate ? 0 : message.content.length);
@@ -20,6 +21,11 @@ export function ChatBubble({ message, onQuickReply, animate }: ChatBubbleProps) 
     const timer = setTimeout(() => setTypedChars((c) => c + 1), 18);
     return () => clearTimeout(timer);
   }, [animate, isUser, doneTyping, typedChars]);
+
+  // Notify parent when typewriter finishes (quick replies appear)
+  useEffect(() => {
+    if (doneTyping && onContentReady) onContentReady();
+  }, [doneTyping, onContentReady]);
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -42,7 +48,7 @@ export function ChatBubble({ message, onQuickReply, animate }: ChatBubbleProps) 
             }`}
           >
             {message.imageError && !message.imageUrl && (
-              <div className="flex items-center gap-2 rounded-lg bg-yellow-50 border border-yellow-200 px-3 py-2 mb-2 text-xs text-yellow-800">
+              <div className="flex items-center gap-2 rounded-lg bg-secondary border border-border px-3 py-2 mb-2 text-xs text-muted-foreground">
                 <span>&#9888;</span>
                 <span>Image generation wasn't successful this time.</span>
               </div>
@@ -52,6 +58,7 @@ export function ChatBubble({ message, onQuickReply, animate }: ChatBubbleProps) 
                 src={message.imageUrl}
                 alt={isUser ? "Uploaded photo" : "AI-generated design"}
                 onClick={() => setLightboxOpen(true)}
+                onLoad={onContentReady}
                 className={`rounded-xl shadow-sm mb-2 object-cover cursor-pointer hover:opacity-90 transition-opacity ${
                   isUser
                     ? "max-w-[200px] max-h-[260px] w-auto"
@@ -60,9 +67,16 @@ export function ChatBubble({ message, onQuickReply, animate }: ChatBubbleProps) 
               />
             )}
             <p>
-              {isUser ? message.content : message.content.slice(0, typedChars)}
-              {!isUser && !doneTyping && (
-                <span className="inline-block w-[2px] h-[1em] bg-ai-bubble-foreground/50 ml-[1px] align-middle animate-pulse" />
+              {isUser ? message.content : (
+                <>
+                  <span>{message.content.slice(0, typedChars)}</span>
+                  {!doneTyping && (
+                    <>
+                      <span className="inline-block w-[2px] h-[1em] bg-ai-bubble-foreground/50 ml-[1px] align-middle animate-pulse" />
+                      <span className="invisible">{message.content.slice(typedChars)}</span>
+                    </>
+                  )}
+                </>
               )}
             </p>
           </div>

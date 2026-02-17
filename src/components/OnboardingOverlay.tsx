@@ -30,7 +30,7 @@ export function OnboardingOverlay({ onDismiss }: OnboardingOverlayProps) {
   const Icon = current.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#3D2E22]/95 px-8 text-white" role="dialog" aria-modal="true" aria-label="Welcome guide">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-foreground/95 px-8 text-white" role="dialog" aria-modal="true" aria-label="Welcome guide">
       <button
         onClick={onDismiss}
         className="absolute top-4 right-4 text-sm text-white/70 hover:text-white"
