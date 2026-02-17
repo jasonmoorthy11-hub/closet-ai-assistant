@@ -10,17 +10,29 @@ import { ChatMessage, sendMessage, resetConversation } from "@/lib/api";
 const ONBOARDING_KEY = "easyclosets_onboarding_done";
 
 const LOADING_MESSAGES = [
-  "Straightening the hangers...",
-  "Color-coordinating your wardrobe...",
-  "Measuring twice, cutting once...",
-  "Making Marie Kondo proud...",
-  "Debating between white and ivory...",
-  "Finding the missing sock...",
-  "Folding the fitted sheets...",
-  "Organizing by season and color...",
-  "Choosing the perfect hardware...",
-  "Spacing hangers exactly 2 inches apart...",
+  "Straightening the hangers",
+  "Color-coordinating your wardrobe",
+  "Measuring twice, cutting once",
+  "Making Marie Kondo proud",
+  "Debating between white and ivory",
+  "Finding the missing sock",
+  "Folding the fitted sheets",
+  "Organizing by season and color",
+  "Choosing the perfect hardware",
+  "Spacing hangers exactly 2 inches apart",
+  "Alphabetizing the spice rack",
+  "Fluffing the throw pillows",
+  "Consulting the feng shui guide",
+  "Ironing out the details",
+  "Matching the drawer pulls",
+  "Rethinking the shoe situation",
+  "Calculating optimal shelf spacing",
+  "Pondering the perfect pantry",
+  "Aligning everything just so",
+  "Admiring the before photo",
 ];
+
+const SPINNER_CHARS = ["·", "✻", "✽", "✶", "✳", "✢"];
 
 const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
@@ -35,24 +47,43 @@ export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem(ONBOARDING_KEY)
   );
-  const [loadingMsgIndex, setLoadingMsgIndex] = useState(
-    () => Math.floor(Math.random() * LOADING_MESSAGES.length)
-  );
+  const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
+  const [typedChars, setTypedChars] = useState(0);
+  const [spinnerIndex, setSpinnerIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const heroFileRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Cycle loading messages
+  // Typewriter: type out current message char by char, then pause, then advance
   useEffect(() => {
     if (!loading) {
-      setLoadingMsgIndex(Math.floor(Math.random() * LOADING_MESSAGES.length));
+      setLoadingMsgIndex(0);
+      setTypedChars(0);
       return;
     }
+    const fullText = LOADING_MESSAGES[loadingMsgIndex];
+    if (typedChars < fullText.length) {
+      // Still typing — add next character
+      const timer = setTimeout(() => setTypedChars((c) => c + 1), 35);
+      return () => clearTimeout(timer);
+    } else {
+      // Fully typed — pause then advance to next message
+      const timer = setTimeout(() => {
+        setLoadingMsgIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+        setTypedChars(0);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, loadingMsgIndex, typedChars]);
+
+  // Spinner character cycling
+  useEffect(() => {
+    if (!loading) return;
     const interval = setInterval(() => {
-      setLoadingMsgIndex((i) => (i + 1) % LOADING_MESSAGES.length);
-    }, 3000);
+      setSpinnerIndex((i) => (i + 1) % SPINNER_CHARS.length);
+    }, 120);
     return () => clearInterval(interval);
   }, [loading]);
 
@@ -212,15 +243,16 @@ export default function ChatPage() {
         ))}
         {loading && (
           <div className="flex justify-start mb-3">
-            <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3">
-              <p className="text-xs text-muted-foreground mb-1.5 italic">
-                {LOADING_MESSAGES[loadingMsgIndex]}
-              </p>
-              <div className="flex gap-1">
-                <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
-                <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
-                <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
-              </div>
+            <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
+              <span className="text-accent text-sm w-3 text-center" aria-hidden="true">
+                {SPINNER_CHARS[spinnerIndex]}
+              </span>
+              <span className="text-xs text-muted-foreground italic">
+                {LOADING_MESSAGES[loadingMsgIndex].slice(0, typedChars)}
+                {typedChars < LOADING_MESSAGES[loadingMsgIndex].length && (
+                  <span className="inline-block w-[1px] h-3 bg-muted-foreground/60 ml-[1px] align-middle animate-pulse" />
+                )}
+              </span>
             </div>
           </div>
         )}
