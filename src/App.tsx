@@ -16,7 +16,7 @@ const queryClient = new QueryClient();
 
 function SiteLayout() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-[100dvh] overflow-hidden">
       <PromoBanner />
       <SiteNav />
       <Outlet />

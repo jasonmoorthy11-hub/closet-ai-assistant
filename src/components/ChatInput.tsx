@@ -41,6 +41,7 @@ export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
         className="shrink-0 bg-accent text-accent-foreground rounded-full h-9 w-9 hover:bg-accent/90"
         onClick={() => fileRef.current?.click()}
         disabled={disabled}
+        aria-label="Upload a photo"
       >
         <Camera className="h-5 w-5" />
       </Button>
@@ -58,6 +59,7 @@ export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
         className="shrink-0 text-accent"
         onClick={handleSend}
         disabled={disabled || !text.trim()}
+        aria-label="Send message"
       >
         <SendHorizontal className="h-5 w-5" />
       </Button>

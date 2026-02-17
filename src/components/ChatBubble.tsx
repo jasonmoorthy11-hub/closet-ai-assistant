@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChatMessage } from "@/lib/api";
 
 interface ChatBubbleProps {
@@ -9,6 +9,15 @@ interface ChatBubbleProps {
 export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [lightboxOpen]);
 
   return (
     <>
@@ -30,7 +39,7 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
             {message.imageUrl && (
               <img
                 src={message.imageUrl}
-                alt="Shared image"
+                alt={isUser ? "Uploaded photo" : "AI-generated design"}
                 onClick={() => setLightboxOpen(true)}
                 className={`rounded-xl shadow-sm mb-2 object-cover cursor-pointer hover:opacity-90 transition-opacity ${
                   isUser
@@ -48,7 +57,7 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
                 <button
                   key={reply}
                   onClick={() => onQuickReply?.(reply)}
-                  className="shrink-0 rounded-full border border-accent bg-background px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent hover:text-accent-foreground transition-colors"
+                  className="shrink-0 rounded-full border border-accent bg-background px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
                 >
                   {reply}
                 </button>
@@ -63,10 +72,12 @@ export function ChatBubble({ message, onQuickReply }: ChatBubbleProps) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-6"
           onClick={() => setLightboxOpen(false)}
+          role="dialog"
+          aria-label="Expanded image view"
         >
           <img
             src={message.imageUrl}
-            alt="Expanded image"
+            alt="Full-size view"
             className="max-w-[90vw] max-h-[85vh] rounded-2xl shadow-2xl object-contain"
             onClick={(e) => e.stopPropagation()}
           />

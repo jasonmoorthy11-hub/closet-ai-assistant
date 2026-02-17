@@ -17,7 +17,7 @@ export function PromoBanner() {
 
   return (
     <div className="bg-accent text-accent-foreground text-xs py-1.5 px-4 text-center relative">
-      <span>
+      <span className="pr-8">
         Up to <strong>25% OFF</strong> with code <strong>ORGANIZE</strong> — 15% off $2,000+ | 20% off $5,000+ | 25% off $10,000+
       </span>
       <button

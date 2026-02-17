@@ -94,7 +94,7 @@ export async function sendMessage(message: string, imageFile?: File): Promise<Ch
     return {
       id: crypto.randomUUID(),
       role: "assistant",
-      content: "I'm having trouble connecting right now. Please make sure the backend is running and try again.",
+      content: "I'm having trouble connecting right now. Please try again in a moment.",
       quickReplies: ["Try again"],
     };
   }

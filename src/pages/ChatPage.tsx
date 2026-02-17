@@ -48,13 +48,15 @@ export default function ChatPage() {
   };
 
   const handleSend = useCallback(async (text: string, image?: File) => {
+    const objectUrl = image ? URL.createObjectURL(image) : undefined;
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
       content: text || "Photo uploaded",
-      imageUrl: image ? URL.createObjectURL(image) : undefined,
+      imageUrl: objectUrl,
     };
     setMessages((prev) => [...prev, userMsg]);
+    if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
     setLoading(true);
 
     const reply = await sendMessage(text, image);
@@ -189,7 +191,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input pinned to bottom */}
-      <div className="sticky bottom-0 z-20 bg-background">
+      <div className="sticky bottom-0 z-20 bg-background pb-[env(safe-area-inset-bottom)]">
         <ChatInput onSend={handleSend} disabled={loading} />
       </div>
     </div>

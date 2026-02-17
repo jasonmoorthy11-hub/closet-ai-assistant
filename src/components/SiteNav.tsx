@@ -49,7 +49,7 @@ export function SiteNav() {
           <Link to="/">
             <Button
               size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs min-h-[44px]"
             >
               Get Started for Free
             </Button>
@@ -58,7 +58,7 @@ export function SiteNav() {
           {/* Mobile hamburger */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open navigation menu">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>

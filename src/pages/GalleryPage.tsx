@@ -21,7 +21,7 @@ export default function GalleryPage() {
     : TEMPLATES.filter((t) => t.category === filterKey);
 
   return (
-    <div className="flex-1 bg-background">
+    <div className="flex-1 bg-background overflow-auto">
       {/* Header */}
       <div className="bg-secondary/50 py-12 px-4 text-center">
         <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-3">
@@ -39,7 +39,7 @@ export default function GalleryPage() {
             <button
               key={cat}
               onClick={() => setActiveFilter(cat)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium border transition-colors ${
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium border transition-colors focus:outline-none focus:ring-2 focus:ring-accent ${
                 activeFilter === cat
                   ? "bg-accent text-accent-foreground border-accent"
                   : "bg-background text-foreground border-border hover:border-accent"
@@ -75,7 +75,7 @@ export default function GalleryPage() {
                 </p>
                 <button
                   onClick={() => navigate(`/?template=${encodeURIComponent(template.title)}`)}
-                  className="text-xs font-medium text-accent hover:text-accent/80 transition-colors"
+                  className="text-xs font-medium text-accent hover:text-accent/80 transition-colors cursor-pointer"
                 >
                   Design something like this &rarr;
                 </button>

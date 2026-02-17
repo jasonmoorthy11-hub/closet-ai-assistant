@@ -16,6 +16,7 @@ export function ChatHeader({ onNewChat }: ChatHeaderProps) {
         size="sm"
         onClick={onNewChat}
         className="text-accent hover:bg-accent/10 h-7 text-xs"
+        aria-label="Start new chat"
       >
         <Plus className="h-3.5 w-3.5 mr-1" />
         New Chat
