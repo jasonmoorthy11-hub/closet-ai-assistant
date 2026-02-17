@@ -5,32 +5,9 @@ import { ChatHeader } from "@/components/ChatHeader";
 import { ChatBubble } from "@/components/ChatBubble";
 import { ChatInput } from "@/components/ChatInput";
 import { OnboardingOverlay } from "@/components/OnboardingOverlay";
-import { ChatMessage, sendMessage, resetConversation } from "@/lib/api";
+import { ChatMessage, sendMessage, sendMessageStream, resetConversation } from "@/lib/api";
 
 const ONBOARDING_KEY = "easyclosets_onboarding_done";
-
-// Photo upload path (image edit/gen — 15-30s, user sees many)
-const PHOTO_LOADING_MESSAGES = [
-  "Your closet just filed for divorce",
-  "The shoes are staging a coup",
-  "A hanger just fainted",
-  "Evicting the ghosts of outfits past",
-  "Your socks are in witness protection now",
-  "A shelf just whispered 'finally'",
-  "The dust bunnies hired a lawyer",
-  "Teaching your pants to stand on their own",
-  "A drawer just rolled its eyes at me",
-  "Your closet rod is having a breakdown",
-  "The moths wrote a formal complaint",
-  "Convincing your shoes they deserve better",
-  "Your sweaters just unionized",
-  "The ironing board wants to be included",
-  "Your closet called, it's seeing other people",
-  "A sock just made a run for it",
-  "The coat hooks are gossiping about you",
-  "Your belts are tangled and so am I",
-  "Filing a missing persons report for the other sock",
-];
 
 // Text chat path (2-5s, user sees 1-2)
 const TEXT_LOADING_MESSAGES = [
@@ -48,6 +25,19 @@ const TEXT_LOADING_MESSAGES = [
 
 const SPINNER_CHAR = "✶";
 
+// Warm gradient placeholder — shown immediately when image gen starts.
+// Under blur(16px) this looks like a soft warm glow where the image will appear.
+const PLACEHOLDER_IMAGE = "data:image/svg+xml," + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="96">` +
+  `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">` +
+  `<stop offset="0%" stop-color="#F0E8DD"/>` +
+  `<stop offset="50%" stop-color="#E5D8CA"/>` +
+  `<stop offset="100%" stop-color="#D4C4B0"/>` +
+  `</linearGradient></defs>` +
+  `<rect width="64" height="96" fill="url(#g)"/>` +
+  `</svg>`
+);
+
 const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "assistant",
@@ -58,30 +48,30 @@ const WELCOME_MESSAGE: ChatMessage = {
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [loading, setLoading] = useState(false);
+  const [imageGenerating, setImageGenerating] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem(ONBOARDING_KEY)
   );
   const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
-  const [loadingWithPhoto, setLoadingWithPhoto] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const heroFileRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const userPhotoRef = useRef<string>();  // persist user's uploaded photo URL for placeholders
+  const lastAiImageRef = useRef<string>();  // last generated AI image for iteration placeholders
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Cycle loading messages sequentially from the appropriate pool
-  const loadingMessages = loadingWithPhoto ? PHOTO_LOADING_MESSAGES : TEXT_LOADING_MESSAGES;
+  // Cycle loading messages sequentially (text-only; photo loading is in ChatBubble)
   useEffect(() => {
     if (!loading) {
       setLoadingMsgIndex(0);
       return;
     }
-    const pool = loadingWithPhoto ? PHOTO_LOADING_MESSAGES : TEXT_LOADING_MESSAGES;
     const interval = setInterval(() => {
-      setLoadingMsgIndex((i) => (i + 1) % pool.length);
+      setLoadingMsgIndex((i) => (i + 1) % TEXT_LOADING_MESSAGES.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [loading, loadingWithPhoto]);
+  }, [loading]);
 
   // Set page title
   useEffect(() => {
@@ -113,6 +103,11 @@ export default function ChatPage() {
 
   const handleSend = useCallback(async (text: string, image?: File) => {
     const objectUrl = image ? URL.createObjectURL(image) : undefined;
+    if (objectUrl) {
+      // Revoke previous photo URL, keep new one alive for placeholders
+      if (userPhotoRef.current) URL.revokeObjectURL(userPhotoRef.current);
+      userPhotoRef.current = objectUrl;
+    }
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -120,16 +115,105 @@ export default function ChatPage() {
       imageUrl: objectUrl,
     };
     setMessages((prev) => [...prev, userMsg]);
-    if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-    setLoadingWithPhoto(!!image);
+
     setLoading(true);
 
-    const reply = await sendMessage(text, image);
-    setMessages((prev) => [...prev, reply]);
-    setLoading(false);
+    const aiMsgId = crypto.randomUUID();
+
+    try {
+      await sendMessageStream(text, {
+        onText: (msg, quickReplies, _convId, shouldGenerateImage) => {
+          // Placeholder priority: new upload > last AI image > user photo > gradient
+          const placeholder = objectUrl || lastAiImageRef.current || userPhotoRef.current || PLACEHOLDER_IMAGE;
+          const aiMsg: ChatMessage = {
+            id: aiMsgId,
+            role: "assistant",
+            content: msg,
+            quickReplies: shouldGenerateImage ? undefined : quickReplies,
+            imageUrl: shouldGenerateImage ? placeholder : undefined,
+            isPartialImage: shouldGenerateImage ? true : undefined,
+            partialIndex: shouldGenerateImage ? -1 : undefined,
+          };
+          setMessages((prev) => [...prev, aiMsg]);
+          setLoading(false);
+          if (shouldGenerateImage) {
+            setImageGenerating(true);
+          }
+        },
+        onPartialImage: (b64, index) => {
+          const dataUri = `data:image/png;base64,${b64}`;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === aiMsgId ? { ...m, imageUrl: dataUri, isPartialImage: true, partialIndex: index } : m
+            )
+          );
+        },
+        onImageComplete: (imageUrl) => {
+          lastAiImageRef.current = imageUrl;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === aiMsgId
+                ? {
+                    ...m,
+                    imageUrl,
+                    isPartialImage: false,
+                    partialIndex: undefined,
+                    quickReplies: m.quickReplies || [
+                      "Try a different style",
+                      "Change the finish color",
+                      "Add more storage",
+                      "Talk to a designer",
+                    ],
+                  }
+                : m
+            )
+          );
+          setImageGenerating(false);
+        },
+        onImageError: (error) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === aiMsgId && !m.imageError
+                ? {
+                    ...m,
+                    isPartialImage: false,
+                    imageError: error,
+                    content:
+                      m.content +
+                      (error === "content_blocked"
+                        ? "\n\nI wasn't able to generate that design — the image request was flagged by our content filter. Try describing your space a bit differently and I'll give it another shot!"
+                        : "\n\nI ran into a hiccup generating the design image. Want to try again?"),
+                    quickReplies: [
+                      "Try generating again",
+                      "Let me describe it differently",
+                      "Skip the image for now",
+                    ],
+                  }
+                : m
+            )
+          );
+          setImageGenerating(false);
+        },
+        onDone: () => {
+          setLoading(false);
+          setImageGenerating(false);
+        },
+      }, image);
+    } catch {
+      // Final fallback
+      const reply = await sendMessage(text, image);
+      setMessages((prev) => [...prev, reply]);
+      setLoading(false);
+      setImageGenerating(false);
+    }
   }, []);
 
   const handleQuickReply = useCallback((text: string) => {
+    const lower = text.toLowerCase();
+    if (lower.includes("upload") && lower.includes("photo")) {
+      fileRef.current?.click();
+      return;
+    }
     handleSend(text);
   }, [handleSend]);
 
@@ -152,6 +236,11 @@ export default function ChatPage() {
   const handleNewChat = () => {
     resetConversation();
     setMessages([WELCOME_MESSAGE]);
+    if (userPhotoRef.current) {
+      URL.revokeObjectURL(userPhotoRef.current);
+      userPhotoRef.current = undefined;
+    }
+    lastAiImageRef.current = undefined;
   };
 
   const showHero = messages.length === 1;
@@ -238,39 +327,41 @@ export default function ChatPage() {
       />
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {messages.slice(1).map((msg, i, arr) => {
-          const isLastAi = msg.role === "assistant" && i === arr.length - 1;
-          return (
-            <ChatBubble
-              key={msg.id}
-              message={msg}
-              onQuickReply={handleQuickReply}
-              animate={isLastAi}
-              onContentReady={scrollToBottom}
-            />
-          );
-        })}
-        {loading && (
-          <div className="flex justify-start mb-3">
-            <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2.5">
-              <span className="loading-spinner text-accent text-xs" aria-hidden="true">
-                {SPINNER_CHAR}
-              </span>
-              <span
-                key={loadingMsgIndex}
-                className="loading-shimmer loading-message-fade text-xs italic font-medium"
-              >
-                {loadingMessages[loadingMsgIndex % loadingMessages.length]}
-              </span>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
+        <div className="min-h-full flex flex-col justify-end">
+          {messages.slice(1).map((msg, i, arr) => {
+            const isLastAi = msg.role === "assistant" && i === arr.length - 1;
+            return (
+              <ChatBubble
+                key={msg.id}
+                message={msg}
+                onQuickReply={handleQuickReply}
+                animate={isLastAi}
+                onContentReady={scrollToBottom}
+              />
+            );
+          })}
+          {loading && !imageGenerating && (
+            <div className="flex justify-start mb-3">
+              <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2.5">
+                <span className="loading-spinner text-accent text-xs" aria-hidden="true">
+                  {SPINNER_CHAR}
+                </span>
+                <span
+                  key={loadingMsgIndex}
+                  className="loading-shimmer loading-message-fade text-xs italic font-medium"
+                >
+                  {TEXT_LOADING_MESSAGES[loadingMsgIndex % TEXT_LOADING_MESSAGES.length]}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Input pinned to bottom */}
       <div className="sticky bottom-0 z-20 bg-background pb-[env(safe-area-inset-bottom)]">
-        <ChatInput onSend={handleSend} disabled={loading} />
+        <ChatInput onSend={handleSend} disabled={loading || imageGenerating} />
       </div>
     </div>
   );

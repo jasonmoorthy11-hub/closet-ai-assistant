@@ -110,3 +110,55 @@
 .loading-message-fade {
   animation: fade-in 0.4s ease-in;
 }
+
+/* Scanning overlay — AI analyzing the user's photo */
+@keyframes scan-sweep {
+  0% { top: -30%; }
+  100% { top: 130%; }
+}
+
+@keyframes scan-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30%;
+  height: 30%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(139, 111, 71, 0.12) 40%,
+    rgba(139, 111, 71, 0.2) 50%,
+    rgba(139, 111, 71, 0.12) 60%,
+    transparent 100%
+  );
+  animation: scan-sweep 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.scan-pulse {
+  animation: scan-pulse 3s ease-in-out infinite;
+}
+
+/* Frosted glass curtain — backdrop-filter with soft bottom edge via mask */
+.frosted-sweep {
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) brightness(1.02);
+  backdrop-filter: blur(14px) saturate(1.1) brightness(1.02);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 100%);
+  will-change: transform;
+}
+
+/* Word-by-word typewriter — pure CSS, GPU-composited opacity */
+@keyframes revealWord {
+  to { opacity: 1; }
+}
+
+.typewriter-word {
+  opacity: 0;
+  animation: revealWord 0.15s ease-in forwards;
+}
