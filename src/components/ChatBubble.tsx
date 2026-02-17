@@ -12,6 +12,7 @@ interface ChatBubbleProps {
 export function ChatBubble({ message, onQuickReply, animate, onContentReady }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Word-by-word typewriter for AI messages
   const words = message.content.split(" ");
@@ -20,7 +21,7 @@ export function ChatBubble({ message, onQuickReply, animate, onContentReady }: C
 
   useEffect(() => {
     if (!animate || isUser || doneTyping) return;
-    const timer = setTimeout(() => setTypedWords((w) => w + 1), 40);
+    const timer = setTimeout(() => setTypedWords((w) => w + 1), 80);
     return () => clearTimeout(timer);
   }, [animate, isUser, doneTyping, typedWords]);
 
@@ -59,12 +60,15 @@ export function ChatBubble({ message, onQuickReply, animate, onContentReady }: C
                 src={message.imageUrl}
                 alt={isUser ? "Uploaded photo" : "AI-generated design"}
                 onClick={() => setLightboxOpen(true)}
-                onLoad={onContentReady}
-                className={`rounded-xl shadow-sm mb-2 object-cover cursor-pointer hover:opacity-90 transition-opacity ${
+                onLoad={() => {
+                  setImageLoaded(true);
+                  onContentReady?.();
+                }}
+                className={`rounded-xl shadow-sm mb-2 object-cover cursor-pointer hover:opacity-90 transition-all duration-1000 ease-out ${
                   isUser
                     ? "max-w-[200px] max-h-[260px] w-auto"
                     : "w-full max-w-[400px]"
-                }`}
+                } ${!isUser && !imageLoaded ? "blur-xl opacity-0 scale-[0.97]" : "blur-0 opacity-100 scale-100"}`}
               />
             )}
             <p>

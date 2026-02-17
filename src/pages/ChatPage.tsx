@@ -24,7 +24,6 @@ const PHOTO_LOADING_MESSAGES = [
   "The moths wrote a formal complaint",
   "Convincing your shoes they deserve better",
   "Your sweaters just unionized",
-  "A wire hanger just said a slur",
   "The ironing board wants to be included",
   "Your closet called, it's seeing other people",
   "A sock just made a run for it",
