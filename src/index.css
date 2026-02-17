@@ -61,26 +61,33 @@
   }
 }
 
-/* Loading shimmer — subtle gleam that sweeps across text */
-@keyframes shimmer {
-  0% { background-position: 100% center; }
-  100% { background-position: -100% center; }
+/* Loading shimmer — light streak that sweeps across text */
+@keyframes shimmer-sweep {
+  0% { left: -40%; }
+  100% { left: 140%; }
 }
 
 .loading-shimmer {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.loading-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 30%;
+  height: 100%;
   background: linear-gradient(
     90deg,
-    hsl(var(--muted-foreground)) 0%,
-    hsl(var(--muted-foreground)) 42%,
-    hsl(var(--foreground)) 50%,
-    hsl(var(--muted-foreground)) 58%,
-    hsl(var(--muted-foreground)) 100%
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
   );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 4s ease-in-out infinite;
+  animation: shimmer-sweep 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 /* Spinner — smooth continuous rotation */
