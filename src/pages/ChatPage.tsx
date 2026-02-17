@@ -11,38 +11,40 @@ const ONBOARDING_KEY = "easyclosets_onboarding_done";
 
 // Photo upload path (image edit/gen — 15-30s, user sees many)
 const PHOTO_LOADING_MESSAGES = [
-  "Asking the shelves to hold still",
-  "Negotiating with your hangers",
-  "Apologizing to the shoes we moved",
-  "Your closet just gasped",
-  "Telling the wire hangers to leave",
-  "Putting pants in therapy",
-  "Bribing the drawers to cooperate",
-  "The floor called, it wants its stuff back",
-  "Shh the closet is transforming",
-  "Teaching your socks to pair up",
-  "Politely removing the chaos",
-  "Giving the dust bunnies an eviction notice",
-  "Your old shelves are crying",
-  "The hangers formed a union",
-  "Consulting a shelf psychic",
-  "Ok who put a shoe in the sweater bin",
-  "The cabinetry has entered the chat",
-  "Whispering words of encouragement to your closet",
+  "Your closet just filed for divorce",
+  "The shoes are staging a coup",
+  "A hanger just fainted",
+  "Evicting the ghosts of outfits past",
+  "Your socks are in witness protection now",
+  "A shelf just whispered 'finally'",
+  "The dust bunnies hired a lawyer",
+  "Teaching your pants to stand on their own",
+  "A drawer just rolled its eyes at me",
+  "Your closet rod is having a breakdown",
+  "The moths wrote a formal complaint",
+  "Convincing your shoes they deserve better",
+  "Your sweaters just unionized",
+  "A wire hanger just said a slur",
+  "The ironing board wants to be included",
+  "Your closet called, it's seeing other people",
+  "A sock just made a run for it",
+  "The coat hooks are gossiping about you",
+  "Your belts are tangled and so am I",
+  "Filing a missing persons report for the other sock",
 ];
 
 // Text chat path (2-5s, user sees 1-2)
 const TEXT_LOADING_MESSAGES = [
-  "Thinking thoughts",
-  "Asking the shelves for advice",
-  "Hold on my pencil broke",
-  "Googling what a pantry is",
-  "Staring at paint swatches menacingly",
-  "Pretending to take notes",
-  "The ideas are loading I promise",
-  "Reorganizing my own thoughts first",
-  "Flipping through an imaginary binder",
-  "One sec a drawer is stuck",
+  "My brain is buffering",
+  "Hold on I dropped my train of thought",
+  "Consulting my inner shelf",
+  "Pretending I went to design school",
+  "Googling what a closet is",
+  "Asking my mom for advice",
+  "Having a moment",
+  "The braincell is loading",
+  "Thoughts are being thunk",
+  "Drawing a blank beautifully",
 ];
 
 const SPINNER_CHAR = "✶";
@@ -238,18 +240,14 @@ export default function ChatPage() {
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {messages.slice(1).map((msg, i, arr) => {
-          const isLastAi = msg.role === "assistant" && i === arr.length - 1;
-          return (
+        {messages.slice(1).map((msg) => (
             <ChatBubble
               key={msg.id}
               message={msg}
               onQuickReply={handleQuickReply}
-              animate={isLastAi}
               onContentReady={scrollToBottom}
             />
-          );
-        })}
+        ))}
         {loading && (
           <div className="flex justify-start mb-3">
             <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2.5">

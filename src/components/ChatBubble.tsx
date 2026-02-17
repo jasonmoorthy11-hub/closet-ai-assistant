@@ -5,27 +5,16 @@ import { ChatMessage } from "@/lib/api";
 interface ChatBubbleProps {
   message: ChatMessage;
   onQuickReply?: (text: string) => void;
-  animate?: boolean;
   onContentReady?: () => void;
 }
 
-export function ChatBubble({ message, onQuickReply, animate, onContentReady }: ChatBubbleProps) {
+export function ChatBubble({ message, onQuickReply, onContentReady }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [typedChars, setTypedChars] = useState(animate ? 0 : message.content.length);
-  const doneTyping = typedChars >= message.content.length;
 
-  // Typewriter effect for AI messages
   useEffect(() => {
-    if (!animate || isUser || doneTyping) return;
-    const timer = setTimeout(() => setTypedChars((c) => c + 1), 18);
-    return () => clearTimeout(timer);
-  }, [animate, isUser, doneTyping, typedChars]);
-
-  // Notify parent when typewriter finishes (quick replies appear)
-  useEffect(() => {
-    if (doneTyping && onContentReady) onContentReady();
-  }, [doneTyping, onContentReady]);
+    if (onContentReady) onContentReady();
+  }, [onContentReady]);
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -66,22 +55,10 @@ export function ChatBubble({ message, onQuickReply, animate, onContentReady }: C
                 }`}
               />
             )}
-            <p>
-              {isUser ? message.content : (
-                <>
-                  <span>{message.content.slice(0, typedChars)}</span>
-                  {!doneTyping && (
-                    <>
-                      <span className="inline-block w-[2px] h-[1em] bg-ai-bubble-foreground/50 ml-[1px] align-middle animate-pulse" />
-                      <span className="invisible">{message.content.slice(typedChars)}</span>
-                    </>
-                  )}
-                </>
-              )}
-            </p>
+            <p>{message.content}</p>
           </div>
 
-          {!isUser && doneTyping && message.quickReplies && message.quickReplies.length > 0 && (
+          {!isUser && message.quickReplies && message.quickReplies.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {message.quickReplies.map((reply) => (
                 <button
