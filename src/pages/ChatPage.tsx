@@ -42,7 +42,7 @@ const TEXT_LOADING_MESSAGES = [
   "Weighing the possibilities",
 ];
 
-const SPINNER_CHARS = ["·", "✻", "✽", "✶", "✳", "✢"];
+const SPINNER_CHAR = "✶";
 
 const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
@@ -58,7 +58,6 @@ export default function ChatPage() {
     () => !localStorage.getItem(ONBOARDING_KEY)
   );
   const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
-  const [spinnerIndex, setSpinnerIndex] = useState(0);
   const [loadingWithPhoto, setLoadingWithPhoto] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const heroFileRef = useRef<HTMLInputElement>(null);
@@ -79,15 +78,6 @@ export default function ChatPage() {
     }, 3000);
     return () => clearInterval(interval);
   }, [loading, loadingWithPhoto]);
-
-  // Spinner character cycling
-  useEffect(() => {
-    if (!loading) return;
-    const interval = setInterval(() => {
-      setSpinnerIndex((i) => (i + 1) % SPINNER_CHARS.length);
-    }, 120);
-    return () => clearInterval(interval);
-  }, [loading]);
 
   // Set page title
   useEffect(() => {
@@ -254,11 +244,11 @@ export default function ChatPage() {
         })}
         {loading && (
           <div className="flex justify-start mb-3">
-            <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
-              <span className="text-accent text-sm w-3 text-center" aria-hidden="true">
-                {SPINNER_CHARS[spinnerIndex]}
+            <div className="bg-ai-bubble rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2.5">
+              <span className="loading-spinner text-accent text-xs" aria-hidden="true">
+                {SPINNER_CHAR}
               </span>
-              <span className="text-xs text-muted-foreground italic">
+              <span className="loading-shimmer text-xs italic font-medium">
                 {loadingMessages[loadingMsgIndex % loadingMessages.length]}
               </span>
             </div>
