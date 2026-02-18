@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Ruler, Palette, Truck, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const STEPS = [
   {
@@ -49,24 +48,20 @@ export default function HowItWorksPage() {
 
   return (
     <div className="flex-1 bg-background overflow-auto">
-      {/* Hero */}
-      <div className="bg-secondary/50 py-12 px-4 text-center">
-        <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-3">
+      {/* Steps */}
+      <div className="max-w-3xl mx-auto px-4 pt-10 pb-8">
+        {/* Header */}
+        <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-2 text-center">
           How It Works
         </h1>
-        <p className="text-muted-foreground max-w-lg mx-auto">
-          From inspiration to installation — designing your custom space is
-          simple with EasyClosets.
+        <p className="text-muted-foreground text-center max-w-lg mx-auto mb-10">
+          From inspiration to installation — designing your custom space is simple with EasyClosets
         </p>
-      </div>
-
-      {/* Steps */}
-      <div className="max-w-3xl mx-auto px-4 py-12">
         <div className="space-y-8">
           {STEPS.map((step) => (
             <div
               key={step.number}
-              className={`flex gap-5 items-start p-5 rounded-xl border transition-colors ${
+              className={`flex gap-5 items-start p-5 rounded-xl border transition-all hover:shadow-sm hover:-translate-y-0.5 ${
                 step.highlight
                   ? "border-accent bg-accent/5"
                   : "border-border bg-card"
@@ -108,13 +103,11 @@ export default function HowItWorksPage() {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Link to="/">
-            <Button
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Start Designing
-            </Button>
+          <Link
+            to="/"
+            className="inline-block bg-accent text-accent-foreground font-medium text-sm px-6 py-3 rounded-full hover:bg-accent/90 transition-colors"
+          >
+            Start Designing
           </Link>
         </div>
       </div>

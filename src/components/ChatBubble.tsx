@@ -156,7 +156,7 @@ export function ChatBubble({ message, onQuickReply, animate, onContentReady }: C
                       />
                     </p>
                   )}
-                  {message.isPartialImage && <ImageLoadingCaption />}
+                  {message.isPartialImage && message.partialIndex !== -2 && <ImageLoadingCaption />}
                 </div>
               )}
             </div>

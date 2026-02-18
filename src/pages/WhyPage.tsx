@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Shield, Truck, Wrench, Leaf, Scissors, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const VALUE_PROPS = [
   {
@@ -60,24 +59,22 @@ export default function WhyPage() {
 
   return (
     <div className="flex-1 bg-background overflow-auto">
-      {/* Hero */}
-      <div className="bg-secondary/50 py-12 px-4 text-center">
-        <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-3">
-          Why Choose EasyClosets?
-        </h1>
-        <p className="text-muted-foreground max-w-lg mx-auto">
-          Premium custom storage, factory-direct to your door — at a fraction of
-          the cost.
-        </p>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 py-12 space-y-16">
+      <div className="max-w-5xl mx-auto px-4 pt-10 pb-8 space-y-16">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-2">
+            Why Choose EasyClosets?
+          </h1>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Premium custom storage, factory-direct to your door — at a fraction of the cost
+          </p>
+        </div>
         {/* Value props grid */}
         <div className="grid md:grid-cols-3 gap-6">
           {VALUE_PROPS.map((prop) => (
             <div
               key={prop.title}
-              className="bg-card border border-border rounded-xl p-6 text-center"
+              className="bg-card border border-border rounded-xl p-6 text-center transition-all hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground mx-auto mb-4">
                 <prop.Icon className="h-5 w-5" />
@@ -101,7 +98,7 @@ export default function WhyPage() {
             {HIGHLIGHTS.map((item) => (
               <div
                 key={item.text}
-                className="flex items-center gap-3 bg-card border border-border rounded-lg px-4 py-3"
+                className="flex items-center gap-3 bg-card border border-border rounded-lg px-4 py-3 transition-all hover:shadow-sm hover:-translate-y-0.5"
               >
                 <item.Icon className="h-4 w-4 text-accent shrink-0" />
                 <span className="text-sm text-foreground">{item.text}</span>
@@ -119,7 +116,7 @@ export default function WhyPage() {
             {TESTIMONIALS.map((t) => (
               <div
                 key={t.name}
-                className="bg-card border border-border rounded-xl p-6"
+                className="bg-card border border-border rounded-xl p-6 transition-all hover:shadow-sm hover:-translate-y-0.5"
               >
                 <p className="text-sm text-muted-foreground leading-relaxed italic mb-4">
                   "{t.quote}"
@@ -140,13 +137,11 @@ export default function WhyPage() {
           <h2 className="font-serif text-2xl text-foreground mb-4">
             Ready to design your space?
           </h2>
-          <Link to="/">
-            <Button
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Start Designing
-            </Button>
+          <Link
+            to="/"
+            className="inline-block bg-accent text-accent-foreground font-medium text-sm px-6 py-3 rounded-full hover:bg-accent/90 transition-colors"
+          >
+            Start Designing
           </Link>
         </div>
       </div>

@@ -51,6 +51,7 @@ export function StreamingImage({ src, isPartial, partialIndex, onLoad, isUser }:
   const stopTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const finalLoadedRef = useRef(false);
   const [sweepPhase, setSweepPhase] = useState<"none" | "ready" | "sweeping" | "done">("none");
+  const prevPartialIndexRef = useRef(partialIndex);
 
   if (isPartial) isStreamingRef.current = true;
   partialIndexRef.current = partialIndex;
@@ -85,17 +86,24 @@ export function StreamingImage({ src, isPartial, partialIndex, onLoad, isUser }:
           activeLayerRef.current = isA ? "B" : "A";
           currentSrcRef.current = src;
 
-          // Crossfade done — NOW update blur target for the new partial
-          if (runningRef.current && partialIndexRef.current >= 0) {
-            const idx = partialIndexRef.current;
-            const t = PHASE_TARGETS[idx] || PHASE_TARGETS[PHASE_TARGETS.length - 1];
-            const c = currentRef.current;
-            targetRef.current = {
-              blur: Math.min(t.blur, c.blur),
-              brightness: Math.max(t.brightness, c.brightness),
-              saturate: Math.max(t.saturate, c.saturate),
-            };
-            stepTimeRef.current = performance.now();
+          // Crossfade done — NOW update blur target for the new content
+          if (runningRef.current) {
+            if (partialIndexRef.current === -2) {
+              // Cleanup preview: snap to clear
+              currentRef.current = { ...FINAL };
+              targetRef.current = { ...FINAL };
+              stepTimeRef.current = performance.now();
+            } else if (partialIndexRef.current >= 0) {
+              const idx = partialIndexRef.current;
+              const t = PHASE_TARGETS[idx] || PHASE_TARGETS[PHASE_TARGETS.length - 1];
+              const c = currentRef.current;
+              targetRef.current = {
+                blur: Math.min(t.blur, c.blur),
+                brightness: Math.max(t.brightness, c.brightness),
+                saturate: Math.max(t.saturate, c.saturate),
+              };
+              stepTimeRef.current = performance.now();
+            }
           }
         }, CROSSFADE_MS + 50);
       });
@@ -109,11 +117,23 @@ export function StreamingImage({ src, isPartial, partialIndex, onLoad, isUser }:
     runningRef.current = true;
 
     const idx = partialIndexRef.current;
-    // User-photo placeholder: start clearer so the photo is recognizable
-    const isGradient = currentSrcRef.current.startsWith("data:image/svg");
-    const placeholderTarget = isGradient ? GRADIENT_PLACEHOLDER_TARGET : PHOTO_PLACEHOLDER_TARGET;
-    const initialTarget = idx < 0 ? placeholderTarget : (PHASE_TARGETS[idx] || PHASE_TARGETS[0]);
-    const startFilter = isGradient ? { ...INITIAL } : { blur: 6, brightness: 0.88, saturate: 0.8 };
+    const isCleanupPreview = idx === -2;
+
+    let startFilter: typeof INITIAL;
+    let initialTarget: typeof INITIAL;
+
+    if (isCleanupPreview) {
+      // Cleanup preview: start crystal clear
+      startFilter = { ...FINAL };
+      initialTarget = { ...FINAL };
+    } else {
+      // Normal placeholder: start blurred
+      const isGradient = currentSrcRef.current.startsWith("data:image/svg");
+      const placeholderTarget = isGradient ? GRADIENT_PLACEHOLDER_TARGET : PHOTO_PLACEHOLDER_TARGET;
+      initialTarget = idx < 0 ? placeholderTarget : (PHASE_TARGETS[idx] || PHASE_TARGETS[0]);
+      startFilter = isGradient ? { ...INITIAL } : { blur: 6, brightness: 0.88, saturate: 0.8 };
+    }
+
     currentRef.current = { ...startFilter };
     targetRef.current = { ...initialTarget };
     stepTimeRef.current = performance.now();
@@ -198,6 +218,28 @@ export function StreamingImage({ src, isPartial, partialIndex, onLoad, isUser }:
       };
     }
   }, [isPartial]);
+
+  // --- Cleanup preview transitions: -1→-2 (snap to clear) and -2→-1 (blur up) ---
+  useEffect(() => {
+    const prev = prevPartialIndexRef.current;
+    prevPartialIndexRef.current = partialIndex;
+
+    if (!isStreamingRef.current || !runningRef.current) return;
+
+    if (prev === -1 && partialIndex === -2) {
+      // Placeholder → cleanup preview: snap to crystal clear immediately
+      currentRef.current = { ...FINAL };
+      targetRef.current = { ...FINAL };
+      stepTimeRef.current = performance.now();
+      if (containerRef.current) {
+        containerRef.current.style.filter = "blur(0px) brightness(1) saturate(1)";
+      }
+    } else if (prev === -2 && partialIndex === -1) {
+      // Cleanup preview period is over — smoothly blur up to await redesign
+      targetRef.current = { ...PHOTO_PLACEHOLDER_TARGET };
+      stepTimeRef.current = performance.now();
+    }
+  }, [partialIndex]);
 
   // --- Non-streaming: blur-up on load ---
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Camera, LayoutGrid } from "lucide-react";
+import { Camera } from "lucide-react";
+import { TEMPLATES, Template } from "@/lib/templates";
 import { ChatHeader } from "@/components/ChatHeader";
 import { ChatBubble } from "@/components/ChatBubble";
 import { ChatInput } from "@/components/ChatInput";
@@ -58,6 +59,7 @@ export default function ChatPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const userPhotoRef = useRef<string>();  // persist user's uploaded photo URL for placeholders
   const lastAiImageRef = useRef<string>();  // last generated AI image for iteration placeholders
+  const cleanupTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -78,11 +80,17 @@ export default function ChatPage() {
     document.title = "AI Design Assistant | EasyClosets";
   }, []);
 
-  // Handle template prefill
+  // Handle template prefill (from /idea-center or direct URL)
   useEffect(() => {
-    const template = searchParams.get("template");
-    if (template) {
-      handleSend(`I'd like a design inspired by: ${template}`);
+    const param = searchParams.get("template");
+    if (param) {
+      const tmpl = TEMPLATES.find(t => t.id === param)
+                || TEMPLATES.find(t => t.title === param);
+      if (tmpl) {
+        handleSend(tmpl.starterPrompt, undefined, tmpl);
+      } else {
+        handleSend(`I'd like a design inspired by: ${param}`);
+      }
       setSearchParams({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,17 +109,22 @@ export default function ChatPage() {
     setShowOnboarding(false);
   };
 
-  const handleSend = useCallback(async (text: string, image?: File) => {
+  const handleSend = useCallback(async (text: string, image?: File, template?: Template) => {
     const objectUrl = image ? URL.createObjectURL(image) : undefined;
     if (objectUrl) {
       // Revoke previous photo URL, keep new one alive for placeholders
       if (userPhotoRef.current) URL.revokeObjectURL(userPhotoRef.current);
       userPhotoRef.current = objectUrl;
     }
+    // Show short display text in bubble, send rich starterPrompt to backend
+    const displayText = template
+      ? `I'd like a ${template.title} design`
+      : (text || "Photo uploaded");
+    const apiText = template ? template.starterPrompt : text;
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: text || "Photo uploaded",
+      content: displayText,
       imageUrl: objectUrl,
     };
     setMessages((prev) => [...prev, userMsg]);
@@ -121,7 +134,7 @@ export default function ChatPage() {
     const aiMsgId = crypto.randomUUID();
 
     try {
-      await sendMessageStream(text, {
+      await sendMessageStream(apiText, {
         onText: (msg, quickReplies, _convId, shouldGenerateImage) => {
           // Placeholder priority: new upload > last AI image > user photo > gradient
           const placeholder = objectUrl || lastAiImageRef.current || userPhotoRef.current || PLACEHOLDER_IMAGE;
@@ -139,6 +152,29 @@ export default function ChatPage() {
           if (shouldGenerateImage) {
             setImageGenerating(true);
           }
+        },
+        onCleanupImage: (cleanupUrl) => {
+          // Show cleanup image crystal clear for ~2.5s (partialIndex=-2 = cleanup preview mode)
+          // StreamingImage snaps to clear on -1→-2, then blurs up on -2→-1
+          lastAiImageRef.current = cleanupUrl;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === aiMsgId
+                ? { ...m, imageUrl: cleanupUrl, isPartialImage: true, partialIndex: -2 }
+                : m
+            )
+          );
+          // After 2.5s, blur up to await the incoming redesign
+          if (cleanupTimerRef.current) clearTimeout(cleanupTimerRef.current);
+          cleanupTimerRef.current = setTimeout(() => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === aiMsgId && m.partialIndex === -2
+                  ? { ...m, partialIndex: -1 }
+                  : m
+              )
+            );
+          }, 2500);
         },
         onPartialImage: (b64, index) => {
           const dataUri = `data:image/png;base64,${b64}`;
@@ -159,9 +195,9 @@ export default function ChatPage() {
                     isPartialImage: false,
                     partialIndex: undefined,
                     quickReplies: m.quickReplies || [
-                      "Try a different style",
-                      "Change the finish color",
-                      "Add more storage",
+                      "Try Scandinavian style",
+                      "Switch to Espresso finish",
+                      "Add more shelving",
                       "Talk to a designer",
                     ],
                   }
@@ -198,10 +234,10 @@ export default function ChatPage() {
           setLoading(false);
           setImageGenerating(false);
         },
-      }, image);
+      }, image, template);
     } catch {
       // Final fallback
-      const reply = await sendMessage(text, image);
+      const reply = await sendMessage(apiText, image, template);
       setMessages((prev) => [...prev, reply]);
       setLoading(false);
       setImageGenerating(false);
@@ -248,7 +284,7 @@ export default function ChatPage() {
   // Hero landing state
   if (showHero) {
     return (
-      <div className="flex-1 flex flex-col bg-background">
+      <div className="flex-1 flex flex-col bg-background min-h-0">
         {showOnboarding && <OnboardingOverlay onDismiss={handleDismissOnboarding} />}
         <ChatHeader onNewChat={handleNewChat} />
 
@@ -260,51 +296,65 @@ export default function ChatPage() {
           onChange={handleHeroFileChange}
         />
 
-        <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-0">
           {/* Headline */}
           <h3 className="font-serif text-2xl md:text-3xl text-foreground mb-2">Design Your Dream Space</h3>
-          <p className="text-muted-foreground text-sm text-center max-w-sm mb-8">
-            Upload a photo and I'll redesign it with custom EasyClosets cabinetry
+          <p className="text-muted-foreground text-sm text-center max-w-sm mb-6">
+            Upload a photo of your space and I'll redesign it with custom EasyClosets cabinetry! Or tell me what you're working with
           </p>
 
-          {/* Centered input */}
-          <div className="w-full max-w-lg mb-6">
-            <ChatInput onSend={handleSend} disabled={loading} centered />
+          {/* Input */}
+          <div className="w-full max-w-lg mb-3">
+            <ChatInput onSend={handleSend} disabled={loading} centered hideCamera />
           </div>
 
-          {/* Action cards */}
-          <div className="flex gap-3 w-full max-w-lg mb-6">
+          {/* Quick actions — upload + suggestions as equal-weight pills */}
+          <div className="flex gap-2 flex-wrap justify-center mb-8">
             <button
               onClick={() => heroFileRef.current?.click()}
-              className="flex-1 flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 hover:border-accent transition-colors"
+              className="rounded-full bg-accent text-accent-foreground px-4 py-1.5 text-xs font-medium hover:bg-accent/90 transition-colors flex items-center gap-1.5 shadow-sm"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                <Camera className="h-5 w-5 text-accent" />
-              </div>
-              <span className="text-sm font-medium text-foreground">Upload a photo</span>
+              <Camera className="h-3.5 w-3.5" />
+              Upload a photo
             </button>
-            <button
-              onClick={() => navigate("/idea-center")}
-              className="flex-1 flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 hover:border-accent transition-colors"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                <LayoutGrid className="h-5 w-5 text-accent" />
-              </div>
-              <span className="text-sm font-medium text-foreground">Browse inspiration</span>
-            </button>
-          </div>
-
-          {/* Quick reply pills */}
-          <div className="flex gap-2 flex-wrap justify-center">
             {["Walk-in closet", "Reach-in closet", "Pantry", "Garage"].map((label) => (
               <button
                 key={label}
                 onClick={() => handleQuickReply(label)}
-                className="rounded-full border border-accent bg-background px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-accent hover:text-accent transition-colors"
               >
                 {label}
               </button>
             ))}
+          </div>
+
+          {/* Template row — compact horizontal scroll, same viewport */}
+          <div className="w-full max-w-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-foreground">Or start with a design</p>
+              <button onClick={() => navigate("/idea-center")} className="text-xs text-accent hover:text-accent/80 transition-colors">
+                Browse all &rarr;
+              </button>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {TEMPLATES.slice(0, 6).map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => handleSend(template.starterPrompt, undefined, template)}
+                  className="shrink-0 w-36 md:w-40 group text-left transition-transform hover:-translate-y-0.5"
+                >
+                  <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-border mb-1.5 transition-shadow group-hover:shadow-md">
+                    <img
+                      src={template.imageUrl}
+                      alt={template.title}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="text-xs font-medium text-foreground truncate">{template.title}</p>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -329,6 +379,12 @@ export default function ChatPage() {
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
         <div className="min-h-full flex flex-col justify-end">
+          {/* Welcome note at top of chat */}
+          <div className="flex justify-center mb-4">
+            <p className="text-xs text-muted-foreground bg-secondary/50 rounded-full px-3 py-1">
+              AI Design Assistant — powered by EasyClosets
+            </p>
+          </div>
           {messages.slice(1).map((msg, i, arr) => {
             const isLastAi = msg.role === "assistant" && i === arr.length - 1;
             return (

@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const CATEGORIES = [
   {
@@ -54,29 +53,29 @@ export default function SolutionsPage() {
 
   return (
     <div className="flex-1 bg-background overflow-auto">
-      {/* Hero */}
-      <div className="bg-secondary/50 py-12 px-4 text-center">
-        <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-3">
-          Our Solutions
-        </h1>
-        <p className="text-muted-foreground max-w-lg mx-auto">
-          Custom storage for every room in your home — designed by AI, built to
-          last.
-        </p>
-      </div>
+      <div className="max-w-5xl mx-auto px-4 pt-10 pb-8 space-y-16">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-2">
+            Our Solutions
+          </h1>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Custom storage for every room in your home — designed by AI, built to last
+          </p>
+        </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-12 space-y-16">
         {/* Category cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {CATEGORIES.map((cat) => (
-            <div
+            <Link
               key={cat.title}
-              className="bg-card border border-border rounded-xl overflow-hidden flex flex-col"
+              to={`/?template=${encodeURIComponent(cat.title)}`}
+              className="group bg-card border border-border rounded-xl overflow-hidden flex flex-col transition-all hover:shadow-md hover:-translate-y-0.5"
             >
               <img
                 src={cat.imageUrl}
                 alt={cat.title}
-                className="w-full h-44 object-cover"
+                className="w-full h-44 object-cover transition-transform group-hover:scale-105"
                 loading="lazy"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
@@ -96,20 +95,11 @@ export default function SolutionsPage() {
                   </span>{" "}
                   {cat.components}
                 </p>
-                <div className="mt-auto">
-                  <Link
-                    to={`/?template=${encodeURIComponent(cat.title)}`}
-                  >
-                    <Button
-                      size="sm"
-                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                      Design Yours
-                    </Button>
-                  </Link>
-                </div>
+                <span className="mt-auto text-xs font-medium text-accent group-hover:text-accent/80 transition-colors">
+                  Design yours &rarr;
+                </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -132,13 +122,11 @@ export default function SolutionsPage() {
 
         {/* CTA */}
         <div className="text-center">
-          <Link to="/">
-            <Button
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Start Designing
-            </Button>
+          <Link
+            to="/"
+            className="inline-block bg-accent text-accent-foreground font-medium text-sm px-6 py-3 rounded-full hover:bg-accent/90 transition-colors"
+          >
+            Start Designing
           </Link>
         </div>
       </div>

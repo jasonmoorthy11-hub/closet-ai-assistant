@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import type { Template } from "./templates";
 
 export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -36,7 +37,7 @@ export async function approveDesign(): Promise<{ status: string; message: string
   }
 }
 
-export async function sendMessage(message: string, imageFile?: File): Promise<ChatMessage> {
+export async function sendMessage(message: string, imageFile?: File, template?: Template): Promise<ChatMessage> {
   try {
     let data;
 
@@ -57,9 +58,19 @@ export async function sendMessage(message: string, imageFile?: File): Promise<Ch
       data = await res.json();
     } else {
       // Use JSON endpoint for text messages
-      const body: Record<string, string> = { message };
+      const body: Record<string, any> = { message };
       if (conversationId) {
         body.conversation_id = conversationId;
+      }
+      if (template) {
+        body.template_metadata = {
+          template_id: template.id,
+          title: template.title,
+          space_type: template.spaceType,
+          style: template.style,
+          finish: template.finish,
+          components: template.components,
+        };
       }
 
       const res = await fetch(`${BASE_URL}/chat`, {
@@ -108,6 +119,7 @@ export async function sendMessage(message: string, imageFile?: File): Promise<Ch
 
 export interface StreamCallbacks {
   onText: (msg: string, quickReplies?: string[], convId?: string, shouldGenerateImage?: boolean) => void;
+  onCleanupImage: (imageUrl: string) => void;
   onPartialImage: (b64: string, index: number) => void;
   onImageComplete: (imageUrl: string) => void;
   onImageError: (error: string) => void;
@@ -142,6 +154,7 @@ export async function sendMessageStream(
   message: string,
   callbacks: StreamCallbacks,
   imageFile?: File,
+  template?: Template,
 ): Promise<void> {
   try {
     let res: Response;
@@ -159,9 +172,19 @@ export async function sendMessageStream(
         body: formData,
       });
     } else {
-      const body: Record<string, string> = { message };
+      const body: Record<string, any> = { message };
       if (conversationId) {
         body.conversation_id = conversationId;
+      }
+      if (template) {
+        body.template_metadata = {
+          template_id: template.id,
+          title: template.title,
+          space_type: template.spaceType,
+          style: template.style,
+          finish: template.finish,
+          components: template.components,
+        };
       }
 
       res = await fetch(`${BASE_URL}/chat-stream`, {
@@ -220,6 +243,12 @@ export async function sendMessageStream(
                 parsed.conversation_id,
                 parsed.should_generate_image,
               );
+            } else if (event === "cleanup_image") {
+              const parsed = JSON.parse(data);
+              const imageUrl = parsed.image_url.startsWith("http")
+                ? parsed.image_url
+                : `${BASE_URL}${parsed.image_url}`;
+              callbacks.onCleanupImage(imageUrl);
             } else if (event === "partial_image") {
               const parsed = JSON.parse(data);
               callbacks.onPartialImage(parsed.b64_json, parsed.index);
@@ -263,7 +292,7 @@ export async function sendMessageStream(
   } catch (error) {
     console.error("Streaming API failed, falling back:", error);
     // Fallback to non-streaming
-    const reply = await sendMessage(message, imageFile);
+    const reply = await sendMessage(message, imageFile, template);
     callbacks.onText(reply.content, reply.quickReplies, undefined, !!reply.imageUrl);
     if (reply.imageUrl) callbacks.onImageComplete(reply.imageUrl);
     callbacks.onDone();
