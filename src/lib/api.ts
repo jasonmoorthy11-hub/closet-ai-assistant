@@ -9,6 +9,8 @@ export interface ChatMessage {
   content: string;
   imageUrl?: string;
   quickReplies?: string[];
+  /** LLM quick replies saved during image gen, applied when image completes */
+  _pendingQuickReplies?: string[];
   imageError?: string;
   isPartialImage?: boolean;
   partialIndex?: number;

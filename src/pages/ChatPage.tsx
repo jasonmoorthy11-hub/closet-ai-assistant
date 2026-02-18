@@ -142,7 +142,9 @@ export default function ChatPage() {
             id: aiMsgId,
             role: "assistant",
             content: msg,
+            // Store LLM quick replies always; hide during image gen (shown after image completes)
             quickReplies: shouldGenerateImage ? undefined : quickReplies,
+            _pendingQuickReplies: shouldGenerateImage ? quickReplies : undefined,
             imageUrl: shouldGenerateImage ? placeholder : undefined,
             isPartialImage: shouldGenerateImage ? true : undefined,
             partialIndex: shouldGenerateImage ? -1 : undefined,
@@ -194,12 +196,14 @@ export default function ChatPage() {
                     imageUrl,
                     isPartialImage: false,
                     partialIndex: undefined,
-                    quickReplies: m.quickReplies || [
-                      "Try Scandinavian style",
-                      "Switch to Espresso finish",
-                      "Add more shelving",
+                    // Use LLM's contextual quick replies saved during text phase
+                    quickReplies: m._pendingQuickReplies || m.quickReplies || [
+                      "Try a different style",
+                      "Change the finish",
+                      "Add more storage",
                       "Talk to a designer",
                     ],
+                    _pendingQuickReplies: undefined,
                   }
                 : m
             )
